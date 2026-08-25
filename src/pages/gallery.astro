@@ -1,0 +1,116 @@
+---
+/**
+ * Gallery (§7.4).
+ *
+ * The homepage dish list links here by anchor, so the four dishes are present
+ * with their ids from the start — otherwise those links would land on a page
+ * with nothing to scroll to.
+ *
+ * Phase 2 replaces the stacked layout below with the asymmetric editorial grid
+ * §7.4 asks for on desktop, where the branzino runs largest. The alternating
+ * ink and cream rooms already follow `plateTone`, so that regrade is layout
+ * only. The optional lightbox is Phase 2 as well.
+ *
+ * Crops here are deliberately not the crops used on the homepage (§5.2): the
+ * homepage boxes are all 4:5, so the gallery shows each photograph at its
+ * native 3:4 with nothing cropped away at all — which is what a gallery is for.
+ * No image is used more than twice across the site.
+ */
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import PageIntro from '@/components/layout/PageIntro.astro';
+import Section from '@/components/layout/Section.astro';
+
+const dishes = (await getCollection('dishes')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const title = 'Gallery — From the Island Meets Italy Kitchen';
+const description =
+  'Jamaican soul. Italian tradition. Food by Chef Kenton Lowrie — whole branzino, mango caprese, oxtail arancini and lime & coconut panna cotta.';
+---
+
+<Base
+  title={title}
+  description={description}
+  breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Gallery', href: '/gallery' }]}
+>
+  <PageIntro title="From the Island Meets Italy Kitchen">
+    <p class="prose">Jamaican soul. Italian tradition. Food by Chef Kenton Lowrie.</p>
+  </PageIntro>
+
+  {
+    /* Plate colour picks the room, exactly as §5.2 intends: dark plates sit in
+       ink, white plates in cream. The page alternates on its own. */
+    dishes.map((dish, i) => (
+      <Section tone={dish.data.plateTone === 'dark' ? 'ink' : 'cream'}>
+        <figure
+          class="dish__figure"
+          id={dish.id}
+          data-side={i % 2 === 0 ? 'left' : 'right'}
+          data-reveal
+        >
+          <Image
+            src={dish.data.image}
+            alt={dish.data.alt}
+            widths={[480, 800, 1080]}
+            sizes="(min-width: 900px) 46vw, 100vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            class="dish__image"
+          />
+          <figcaption class="dish__caption">
+            <span class="dish__rule" aria-hidden="true" />
+            <span class="dish__name display">{dish.data.name}</span>
+          </figcaption>
+        </figure>
+      </Section>
+    ))
+  }
+</Base>
+
+<style>
+  .dish__figure {
+    margin: 0;
+    /* Anchored from the homepage dish list — clear the fixed header. */
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  .dish__image {
+    width: 100%;
+    /* Native 3:4 — nothing is cropped. The homepage uses 4:5 throughout, so no
+       crop is ever reused, and a 5:4 landscape box here would have cut roughly
+       40% of the height off plates that are framed vertically (§5.2). */
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .dish__caption { display: block; }
+
+  .dish__rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin-block: clamp(1.25rem, 3vh, 1.75rem) clamp(0.9rem, 2vh, 1.25rem);
+    background: var(--room-rule);
+  }
+
+  .dish__name {
+    display: block;
+    font-size: var(--step-2);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--room-text);
+    text-wrap: balance;
+  }
+
+  @media (min-width: 900px) {
+    /* Alternating sides of the meeting line, so the column of dishes never
+       sits dead centre (§6.7). The side is set in the template rather than
+       with :nth-of-type on the Section: a page's scoped CSS cannot select a
+       child component's root element. */
+    .dish__figure { max-width: 46%; }
+    .dish__figure[data-side='right'] { margin-inline-start: auto; }
+  }
+</style>

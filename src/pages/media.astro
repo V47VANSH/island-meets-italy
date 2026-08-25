@@ -1,0 +1,70 @@
+---
+/**
+ * Media (§7.5).
+ *
+ * Phase 2 adds the author photograph and the press section — the latter built
+ * as a component that renders nothing while the collection is empty, never an
+ * empty-state message on a public page (§7.5).
+ *
+ * The media kit download only appears once a PDF actually exists; see
+ * `mediaKit.available` in site.ts. A download button pointing at a missing file
+ * is the broken link §10 rules out.
+ */
+import Base from '@/layouts/Base.astro';
+import PageIntro from '@/components/layout/PageIntro.astro';
+import Button from '@/components/ui/Button.astro';
+import { site } from '@/config/site';
+
+const title = 'Media & Press — Chef Kenton Lowrie';
+const description =
+  'Chef Kenton Lowrie is available for interviews, culinary features, television and radio appearances, podcasts and speaking opportunities.';
+---
+
+<Base
+  title={title}
+  description={description}
+  breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Media', href: '/media' }]}
+>
+  <PageIntro
+    title="Media & Press"
+    standfirst={`${site.chef.name} — Professional Chef • Author • Founder of ${site.name}`}
+  >
+    <p class="prose">
+      Chef Kenton is available for interviews, culinary features, television and
+      radio appearances, podcasts, speaking opportunities and discussions
+      surrounding food, publishing and entrepreneurship.
+    </p>
+    <p class="prose">
+      Topics can include the inspiration behind Island Meets Italy,
+      Jamaican-Italian culinary fusion, building flavour through strong
+      foundations, recipe development, professional kitchen leadership, cookbook
+      publishing, entrepreneurship and the future of the Island Meets Italy
+      brand.
+    </p>
+
+    <div class="media__actions">
+      {
+        site.mediaKit.available && (
+          <Button href={site.mediaKit.path} variant="filled" download>
+            Download Author &amp; Book Media Kit
+          </Button>
+        )
+      }
+      <Button href="/contact?type=media" variant="outlined">Media Inquiries</Button>
+    </div>
+  </PageIntro>
+</Base>
+
+<style>
+  .media__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-block-start: clamp(2rem, 4vh, 2.75rem);
+  }
+  .media__actions > :global(.btn) { flex: 1 1 16rem; }
+
+  @media (min-width: 900px) {
+    .media__actions > :global(.btn) { flex: 0 0 auto; }
+  }
+</style>

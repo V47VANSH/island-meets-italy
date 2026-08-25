@@ -1,0 +1,73 @@
+---
+/**
+ * Contact (§7.6).
+ *
+ * Phase 2 adds the form itself — Name, Email, Inquiry Type, Message — with the
+ * Pages Function, Resend and Turnstile behind it, and the `?type=` preselect.
+ *
+ * The official public email and social links render from config the moment they
+ * exist and render nothing until then (§10). No telephone number, ever (§4.7).
+ */
+import Base from '@/layouts/Base.astro';
+import PageIntro from '@/components/layout/PageIntro.astro';
+import { site, socialLinks } from '@/config/site';
+
+const title = 'Contact — Island Meets Italy';
+const description =
+  'Get in touch with Island Meets Italy for general inquiries, media opportunities, partnerships, speaking engagements and business inquiries.';
+---
+
+<Base
+  title={title}
+  description={description}
+  breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Contact', href: '/contact' }]}
+>
+  <PageIntro title="Get in Touch">
+    <p class="prose">
+      For general inquiries, media opportunities, partnerships, speaking
+      engagements and Island Meets Italy business inquiries.
+    </p>
+
+    {
+      site.contact.email && (
+        <p class="contact__email">
+          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+        </p>
+      )
+    }
+
+    {
+      socialLinks.length > 0 && (
+        <ul class="contact__social">
+          {socialLinks.map((social) => (
+            <li>
+              <a href={social.href} rel="noopener noreferrer me">{social.label}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </PageIntro>
+</Base>
+
+<style>
+  .contact__email a,
+  .contact__social a {
+    color: var(--room-accent);
+    text-decoration: none;
+    border-block-end: 1px solid transparent;
+    transition: border-color var(--dur-link) var(--ease-signature);
+  }
+  .contact__email a:hover,
+  .contact__social a:hover { border-block-end-color: currentColor; }
+
+  .contact__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+  }
+</style>

@@ -26,6 +26,12 @@ export interface Props {
   /** Interior pages pass their trail; Home passes nothing (§12). */
   breadcrumbs?: { name: string; href: string }[];
   bodyClass?: string;
+  /**
+   * Let the header sit transparent over the top of the page until scrolled.
+   * Only for a page whose first block is a full-bleed hero dark enough to
+   * carry the nav — the home page. Everywhere else the bar is solid at once.
+   */
+  headerOverlay?: boolean;
 }
 
 const {
@@ -35,6 +41,7 @@ const {
   schema = [],
   breadcrumbs,
   bodyClass = '',
+  headerOverlay = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
@@ -154,7 +161,7 @@ const jsonLd = {
 
     <Header />
 
-    <main id="main">
+    <main id="main" data-header-overlay={headerOverlay ? '' : undefined}>
       <slot />
     </main>
 

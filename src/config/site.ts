@@ -58,6 +58,13 @@ export const site = {
   mediaKit: {
     path: '/media-kit.pdf',
     isFinal: false,          // flip when final PDF arrives
+    /**
+     * PENDING. No PDF has been delivered — not even the proof §4.6 refers to.
+     * While this is false the download button does not render at all, because
+     * a button that 404s is exactly the broken link §10 forbids. Drop the file
+     * at `public/media-kit.pdf` and flip this to true; nothing else changes.
+     */
+    available: false,
   },
 
   nav: [

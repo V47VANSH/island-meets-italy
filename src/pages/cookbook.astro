@@ -1,0 +1,84 @@
+---
+/**
+ * Cookbook (§7.3).
+ *
+ * This page carries more than the other openers on purpose: it is where
+ * BUY THE BOOK lands until the live purchase URL exists (§10), so it has to
+ * answer "what is this book" on its own. Title block, intro, and the book
+ * information list.
+ *
+ * Phase 2 adds "Build the Foundation. Then Build the Dish.", "Created for the
+ * Home Kitchen", the hi-res cover on ink with a soft gold edge, and the sticky
+ * mobile BUY THE BOOK bar this page alone gets.
+ */
+import Base from '@/layouts/Base.astro';
+import PageIntro from '@/components/layout/PageIntro.astro';
+import BookInfo from '@/components/cookbook/BookInfo.astro';
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import { site, buyUrl } from '@/config/site';
+
+const title = 'Volume 1: Foundations of Flavor — The Cookbook';
+const description =
+  'The debut cookbook from Chef Kenton Lowrie. Volume 1: Foundations of Flavor explores the meeting of Jamaican and Italian cuisine. Paperback, CAD $29.99.';
+
+/** Book schema for this page. Null config values are omitted, not emitted (§12). */
+const bookSchema = {
+  '@type': 'Book',
+  name: `${site.book.title} — ${site.book.volume}`,
+  author: { '@id': `${site.url}/#kenton` },
+  publisher: site.book.publisher,
+  numberOfPages: site.book.pages,
+  bookFormat: 'https://schema.org/Paperback',
+  inLanguage: 'en',
+  ...(site.book.isbn ? { isbn: site.book.isbn } : {}),
+  ...(site.book.publicationDate ? { datePublished: site.book.publicationDate } : {}),
+  offers: {
+    '@type': 'Offer',
+    price: site.book.priceValue,
+    priceCurrency: site.book.currency,
+    ...(site.book.purchaseUrl ? { url: site.book.purchaseUrl } : {}),
+  },
+};
+---
+
+<Base
+  title={title}
+  description={description}
+  schema={[bookSchema]}
+  breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Cookbook', href: '/cookbook' }]}
+>
+  <PageIntro title="Island Meets Italy" standfirst={site.book.volume}>
+    <div class="cookbook__credits">
+      <p class="cookbook__tagline utility">{site.tagline}</p>
+      <p class="cookbook__author utility">By {site.book.author}</p>
+    </div>
+
+    <p class="prose">
+      Island Meets Italy: Volume 1 — Foundations of Flavor is the debut cookbook
+      from Chef Kenton Lowrie and the first publication in the Island Meets Italy
+      series. Drawing on more than 20 years of professional culinary experience,
+      the book explores the meeting of Jamaican and Italian cuisine through
+      recipes that respect tradition while creating something distinctive.
+    </p>
+
+    <div class="cookbook__actions">
+      <Button href={buyUrl} variant="filled">Buy the Book</Button>
+    </div>
+  </PageIntro>
+
+  <BookInfo />
+</Base>
+
+<style>
+  .cookbook__credits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .cookbook__tagline { color: var(--room-accent); }
+  .cookbook__author { color: var(--room-mute); }
+
+  .cookbook__actions { margin-block-start: clamp(2rem, 4vh, 2.75rem); }
+</style>

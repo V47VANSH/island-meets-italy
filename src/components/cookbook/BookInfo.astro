@@ -1,0 +1,106 @@
+---
+/**
+ * Book information (§7.3) — a two-column definition list on cream, hairline
+ * rules between rows, tabular numerals.
+ *
+ * ISBN and publication date are still pending (§14). They render the word
+ * `Pending` in the same row, at the same size, so when the real values arrive
+ * the layout does not shift by a pixel — the rule from §10.
+ */
+import Section from '@/components/layout/Section.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import { site, PENDING_LABEL } from '@/config/site';
+
+const rows: { label: string; value: string; pending?: boolean }[] = [
+  { label: 'Title', value: site.book.title },
+  { label: 'Volume', value: site.book.volume },
+  { label: 'Author', value: site.book.author },
+  { label: 'Publisher', value: site.book.publisher },
+  { label: 'Format', value: site.book.format },
+  { label: 'Pages', value: String(site.book.pages) },
+  { label: 'Language', value: site.book.language },
+  { label: 'Price', value: site.book.price },
+  {
+    label: 'ISBN',
+    value: site.book.isbn ?? PENDING_LABEL,
+    pending: site.book.isbn === null,
+  },
+  {
+    label: 'Publication Date',
+    value: site.book.publicationDate ?? PENDING_LABEL,
+    pending: site.book.publicationDate === null,
+  },
+];
+---
+
+<Section tone="cream" labelledby="book-info-title" class="bookinfo">
+  <div class="bookinfo__wrap" data-reveal>
+    <Eyebrow as="div"><h2 id="book-info-title" class="bookinfo__title">Book Information</h2></Eyebrow>
+
+    <dl class="bookinfo__list">
+      {
+        rows.map((row) => (
+          <div class="bookinfo__row">
+            <dt class="bookinfo__label">{row.label}</dt>
+            <dd class="bookinfo__value" data-pending={row.pending ? '' : undefined}>
+              {row.value}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</Section>
+
+<style>
+  .bookinfo__wrap { max-width: 46rem; }
+
+  .bookinfo__title {
+    font: inherit;
+    color: inherit;
+    margin: 0;
+  }
+
+  .bookinfo__list {
+    margin-block-start: clamp(1.75rem, 4vh, 2.5rem);
+    border-block-start: 1px solid var(--room-rule);
+  }
+
+  .bookinfo__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+    padding-block: clamp(0.85rem, 2vh, 1.15rem);
+    border-block-end: 1px solid var(--room-rule);
+  }
+
+  .bookinfo__label {
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    color: var(--room-mute);
+  }
+
+  .bookinfo__value {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    line-height: 1.4;
+    color: var(--room-text);
+    /* Page counts and prices line up column-wise (§6.3). */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Same row, same size, no layout shift when the value lands. */
+  .bookinfo__value[data-pending] { color: var(--room-mute); }
+
+  @media (min-width: 700px) {
+    .bookinfo__row {
+      grid-template-columns: 14rem 1fr;
+      gap: 0 2rem;
+      align-items: baseline;
+    }
+  }
+</style>

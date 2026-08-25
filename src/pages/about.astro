@@ -1,0 +1,36 @@
+---
+/**
+ * About (§7.2).
+ *
+ * Phase 2 will add "The Story Behind Island Meets Italy", "The Philosophy" and
+ * "More Than a Cookbook", plus the author photograph once it arrives (§14).
+ * This is the approved opening section only — real copy, not a stub.
+ */
+import Base from '@/layouts/Base.astro';
+import PageIntro from '@/components/layout/PageIntro.astro';
+
+const title = 'About Chef Kenton Lowrie — Island Meets Italy';
+const description =
+  'Chef Kenton Lowrie is a professional chef, author and founder of Island Meets Italy, bringing together the flavours of Jamaica and Italian tradition.';
+---
+
+<Base
+  title={title}
+  description={description}
+  breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'About', href: '/about' }]}
+>
+  <PageIntro title="A Career Built in the Kitchen">
+    <p class="prose">
+      Chef Kenton Lowrie is a professional chef, author and founder of Island
+      Meets Italy, a culinary brand bringing together the vibrant flavours of
+      Jamaica and the timeless traditions of Italian cuisine.
+    </p>
+    <p class="prose">
+      With more than 20 years of experience in professional kitchens, Kenton has
+      built his career through hands-on cooking, recipe development, menu
+      creation, leadership and a commitment to consistency. His professional
+      experience was further strengthened through Culinary Management studies at
+      Humber College.
+    </p>
+  </PageIntro>
+</Base>

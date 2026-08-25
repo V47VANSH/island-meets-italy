@@ -1,0 +1,89 @@
+---
+/**
+ * PageIntro — the opening block every interior page shares.
+ *
+ * Carries the page's <h1> left of the meeting line and its intro copy right of
+ * it, so an interior page opens with the same gesture as the home page: the eye
+ * crossing the axis. Mobile stacks, as everywhere (§6.4).
+ */
+import Section from './Section.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+
+interface Props {
+  /** Small tracked label above the heading. Optional. */
+  eyebrow?: string;
+  title: string;
+  /** Rendered under the heading, left of the axis, when the page has a subtitle. */
+  standfirst?: string;
+  tone?: 'ink' | 'cream';
+  id?: string;
+}
+
+const { eyebrow, title, standfirst, tone = 'ink', id = 'page-title' } = Astro.props;
+---
+
+<Section tone={tone} labelledby={id} lineCap="top" class="pageintro">
+  <div class="pageintro__grid">
+    <div class="pageintro__headingwrap" data-reveal>
+      {eyebrow && <Eyebrow class="pageintro__eyebrow">{eyebrow}</Eyebrow>}
+      <h1 class="pageintro__heading display" id={id}>{title}</h1>
+      {standfirst && <p class="pageintro__standfirst display">{standfirst}</p>}
+    </div>
+
+    <div class="pageintro__body" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+      <slot />
+    </div>
+  </div>
+</Section>
+
+<style>
+  .pageintro__grid {
+    /* Clears the fixed header — this is the first block on every page. It sits
+       on the grid, not on the section: a child component cannot style the
+       Section root, which carries Section's scope id rather than this one's. */
+    padding-block-start: var(--header-h);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vh, 4rem) 0;
+  }
+
+  .pageintro__eyebrow { margin-block-end: 1.25rem; }
+
+  .pageintro__heading {
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .pageintro__standfirst {
+    margin-block-start: 1.1rem;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--room-mute);
+  }
+
+  .pageintro__body > :global(* + *) { margin-block-start: 1.35em; }
+  .pageintro__body :global(.prose) { color: var(--room-mute); }
+
+  @media (min-width: 900px) {
+    .pageintro__grid {
+      /* The column boundary is the meeting line. */
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .pageintro__headingwrap {
+      grid-column: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .pageintro__body {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+      padding-block-start: clamp(0.5rem, 2vh, 1.5rem);
+    }
+  }
+</style>

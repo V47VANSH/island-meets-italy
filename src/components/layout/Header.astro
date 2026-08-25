@@ -75,7 +75,7 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
       border-color var(--dur-link) var(--ease-signature);
   }
 
-  .header[data-scrolled] {
+  .header[data-solid] {
     --header-bg: var(--ink);
     --header-rule: var(--rule-dark);
   }
@@ -87,7 +87,7 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
     --header-mute: var(--text-on-light-mute);
     --header-accent: var(--gold-deep);
   }
-  .header[data-room='cream'][data-scrolled] {
+  .header[data-room='cream'][data-solid] {
     --header-bg: var(--cream);
     --header-rule: var(--rule-light);
   }
@@ -242,8 +242,14 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
    * persists across route changes (§6.6) and would otherwise keep observing
    * sections that no longer exist.
    *
-   *   data-scrolled — solid bar after 80px of scroll (§6.5)
-   *   data-room     — inverts to cream while the bar overlaps a cream room
+   *   data-solid   — the bar has a background and a bottom rule (§6.5). True
+   *                  once scrolled past 80px, and true immediately on any page
+   *                  that did not opt into the transparent hero treatment.
+   *   data-room    — inverts to cream while the bar overlaps a cream room
+   *   aria-current — which link is the current page. This has to be reapplied
+   *                  by hand: the header is transition:persist'd, so its markup
+   *                  survives a client-side navigation untouched and the marker
+   *                  would otherwise stay stuck on whichever page loaded first.
    */
   let teardown: (() => void) | null = null;
 
@@ -253,8 +259,25 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
     const header = document.querySelector<HTMLElement>('[data-header]');
     if (!header) return;
 
+    // Server-rendered aria-current is stale on a persisted header; resync it.
+    const path = window.location.pathname.replace(/(.)\/$/, '$1');
+    header
+      .querySelectorAll<HTMLAnchorElement>('.header__link, .mobile-nav__link')
+      .forEach((link) => {
+        const href = link.getAttribute('href');
+        if (href === path) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+
+    // Only a page with a full-bleed hero behind the bar asks for the
+    // transparent treatment. Read from <main>, which is swapped on every
+    // navigation, because the header itself persists across routes.
+    const overlay = document
+      .querySelector('#main')
+      ?.hasAttribute('data-header-overlay');
+
     const onScroll = () => {
-      header.toggleAttribute('data-scrolled', window.scrollY > 80);
+      header.toggleAttribute('data-solid', !overlay || window.scrollY > 80);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });

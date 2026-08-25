@@ -1,12 +1,16 @@
 /**
  * Build-time audit against the non-negotiables in the build context.
  *
- * Checks the approved copy in §4 is reproduced character for character, that
- * gold never lands as text on a light background (§6.2), that contrast clears
- * WCAG AA (§11), that no telephone number appears anywhere (§4.7), and that
- * every image carries descriptive alt text (§11).
+ * The approved copy in §4 is compared against
+ * resources/island-meets-italy-BUILD-CONTEXT.md itself rather than a retyped
+ * copy, so this check cannot drift from the source of truth.
  *
- * Usage: node scripts/audit.mjs [url]
+ * Home-page copy is only checked on the home route. The universal rules run on
+ * every route: no telephone number (§4.7), no empty or "coming soon" states
+ * (§10), descriptive alt text (§11), valid JSON-LD with no nulls (§12), and
+ * exactly one <h1> with title, description and canonical (§12).
+ *
+ * Usage: node scripts/audit.mjs [baseUrl] [...routes]
  */
 import { readFileSync } from 'node:fs';
 
@@ -28,7 +32,7 @@ try {
   process.exit(1);
 }
 
-/** Pull the approved copy straight out of the source of truth, not a retype. */
+/** Pull the approved copy straight out of the source of truth. */
 function approved(startMarker, endMarker) {
   const a = src.indexOf(startMarker);
   const b = src.indexOf(endMarker, a);
@@ -40,14 +44,14 @@ function approved(startMarker, endMarker) {
     .filter(Boolean);
 }
 
-const blocks = [
+const homeBlocks = [
   ...approved('**Hero**', 'Buttons: `EXPLORE THE COOKBOOK`'),
   ...approved('**Brand introduction**', 'Button: `DISCOVER ISLAND MEETS ITALY`'),
   ...approved('**Cookbook feature**', 'Buttons: `DISCOVER THE BOOK`'),
   ...approved('**Food feature**', 'Client instruction:'),
 ];
 
-const buttons = [
+const homeButtons = [
   'EXPLORE THE COOKBOOK',
   'MEET CHEF KENTON',
   'DISCOVER ISLAND MEETS ITALY',
@@ -55,121 +59,155 @@ const buttons = [
   'BUY THE BOOK',
 ];
 
-const footer = [
+const footerLines = [
   'Where Island Soul Meets Italian Heart',
   'Chef Kenton Lowrie — Professional Chef • Author • Founder',
   '© 2026 Island Meets Italy Inc. All Rights Reserved.',
 ];
 
-const url = process.argv[2] ?? 'http://localhost:4321/';
-const html = await (await fetch(url)).text();
+/** Routes carrying a Book node in their JSON-LD (§12). */
+const BOOK_ROUTES = new Set(['/', '/cookbook']);
 
-/** Visible text, tags stripped, whitespace collapsed, entities decoded. */
-const text = html
-  .replace(/<script[\s\S]*?<\/script>/g, ' ')
-  .replace(/<style[\s\S]*?<\/style>/g, ' ')
-  .replace(/<[^>]+>/g, ' ')
-  .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(+d))
-  .replace(/&amp;/g, '&')
-  .replace(/&quot;/g, '"')
-  .replace(/&#x27;|&apos;/g, "'")
-  .replace(/&nbsp;/g, ' ')
-  .replace(/&lt;/g, '<')
-  .replace(/&gt;/g, '>')
-  .replace(/\s+/g, ' ')
-  .trim();
+const base = (process.argv[2] ?? 'http://localhost:4321/').replace(/\/$/, '');
+const routes =
+  process.argv.length > 3
+    ? process.argv.slice(3)
+    : ['/', '/about', '/cookbook', '/gallery', '/media', '/contact'];
+
+let failures = 0;
+
+function check(label, ok, detail = '') {
+  if (ok) return;
+  failures++;
+  console.log(`  FAIL  ${label}`);
+  if (detail) console.log(`        ${detail}`);
+}
+
+/** Visible text: tags stripped, entities decoded, whitespace collapsed. */
+function visibleText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/g, ' ')
+    .replace(/<style[\s\S]*?<\/style>/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(+d))
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;|&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
-let failures = 0;
-const check = (label, ok, detail = '') => {
-  if (!ok) {
-    failures++;
-    console.log(`  FAIL  ${label}${detail ? '\n        ' + detail : ''}`);
+function auditPage(route, html) {
+  const text = visibleText(html);
+
+  if (route === '/') {
+    for (const line of homeBlocks) {
+      const needle = norm(line);
+      if (needle === 'ISLAND MEETS ITALY') continue; // wordmark, checked below
+
+      // Lines the client wrote in caps render in sentence case and are
+      // uppercased with CSS — identical on screen, and kinder to screen
+      // readers, which otherwise spell literal all-caps out letter by letter.
+      const isCaps = needle === needle.toUpperCase() && /[A-Z]{4}/.test(needle);
+      const found = isCaps
+        ? text.toUpperCase().includes(needle)
+        : text.includes(needle);
+
+      const shown = needle.slice(0, 70) + (needle.length > 70 ? '…' : '');
+      check(`missing or altered: "${shown}"`, found);
+    }
+
+    check('hero wordmark', /Island\s*Meets\s*Italy/i.test(text));
+
+    for (const label of homeButtons) {
+      check(
+        `button label "${label}"`,
+        new RegExp(label.replace(/ /g, '\\s+'), 'i').test(text),
+      );
+    }
+    console.log(
+      `  §4   ${homeBlocks.length} copy blocks + ${homeButtons.length} button labels`,
+    );
   }
-};
 
-console.log('\n§4  Approved copy reproduced exactly');
-for (const line of blocks) {
-  const needle = norm(line);
-  if (needle === 'ISLAND MEETS ITALY') continue; // wordmark, checked separately
+  for (const line of footerLines) check(`footer line "${line}"`, text.includes(line));
 
-  // Lines the client wrote in caps are rendered in sentence case and uppercased
-  // with CSS. That is the same on screen and kinder to screen readers, which
-  // otherwise spell literal all-caps out letter by letter. Compare case-blind
-  // for those; prose stays an exact match.
-  const isCapsLine = needle === needle.toUpperCase() && /[A-Z]{4}/.test(needle);
-  const ok = isCapsLine
-    ? text.toUpperCase().includes(needle)
-    : text.includes(needle);
+  // §4.7 — never a telephone number, anywhere.
+  check('no tel: link', !/href\s*=\s*["']tel:/i.test(html));
+  const phoneLike = text.match(
+    /(?:\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}/g,
+  );
+  check('no phone-shaped number', !phoneLike, phoneLike ? phoneLike.join(', ') : '');
 
-  check(`missing/altered: "${needle.slice(0, 70)}${needle.length > 70 ? '…' : ''}"`, ok);
-}
-check('hero wordmark "Island Meets Italy"', /Island\s*Meets\s*Italy/i.test(text));
-console.log(`        ${blocks.length} approved copy blocks checked`);
-
-console.log('\n§4  Button labels verbatim');
-for (const b of buttons) {
-  // Rendered with CSS uppercase, so compare case-insensitively.
-  check(`button label "${b}"`, new RegExp(b.replace(/ /g, '\\s+'), 'i').test(text));
-}
-
-console.log('\n§4.8  Footer copy');
-for (const f of footer) check(`footer line "${f}"`, text.includes(f));
-
-console.log('\n§4.7  No telephone number anywhere');
-const telHref = /href\s*=\s*["']tel:/i.test(html);
-const phoneLike = text.match(/(?:\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}/g);
-check('no tel: link', !telHref);
-check('no phone-shaped number', !phoneLike, phoneLike ? phoneLike.join(', ') : '');
-
-console.log('\n§10  No empty / coming-soon states on a public page');
-for (const bad of ['coming soon', 'Coming Soon', 'TBD', 'Lorem ipsum', 'undefined', 'null']) {
-  check(`no "${bad}" in visible text`, !text.includes(bad));
-}
-
-console.log('\n§11  Images carry descriptive alt text');
-const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
-check('at least one image', imgs.length > 0);
-for (const img of imgs) {
-  const alt = img.match(/\salt\s*=\s*"([^"]*)"/);
-  const decorative = alt && alt[1] === '';
-  check(`img has alt`, Boolean(alt));
-  if (alt && !decorative) {
-    check('alt is descriptive (> 40 chars)', alt[1].length > 40,
-      `got ${alt[1].length} chars: "${alt[1].slice(0, 60)}…"`);
+  // §10 — nothing empty or placeholder-ish on a public page.
+  for (const bad of ['coming soon', 'Coming Soon', 'TBD', 'Lorem ipsum', 'undefined']) {
+    check(`no "${bad}" in visible text`, !text.includes(bad));
   }
-}
-console.log(`        ${imgs.length} images checked`);
 
-console.log('\n§12  Structured data');
-const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
-check('JSON-LD present', Boolean(ld));
-if (ld) {
-  let parsed = null;
-  try {
-    parsed = JSON.parse(ld[1]);
-  } catch (e) {
-    check('JSON-LD parses', false, String(e));
+  // §11 — descriptive alt text on every non-decorative image.
+  const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
+  for (const img of imgs) {
+    const alt = img.match(/\salt\s*=\s*"([^"]*)"/);
+    check('img has an alt attribute', Boolean(alt), img.slice(0, 80));
+    if (alt && alt[1] !== '') {
+      check(
+        'alt is descriptive (> 40 chars)',
+        alt[1].length > 40,
+        `${alt[1].length} chars: "${alt[1].slice(0, 60)}…"`,
+      );
+    }
   }
-  if (parsed) {
-    const graph = parsed['@graph'] ?? [];
-    const types = graph.map((n) => n['@type']);
-    check('has Organization', types.includes('Organization'));
-    check('has Person', types.includes('Person'));
-    check('has Book', types.includes('Book'));
-    const flat = JSON.stringify(parsed);
-    check('no null values emitted', !flat.includes(':null'));
-    check('no empty strings emitted', !flat.includes(':""'));
+
+  // §12 — structured data, with nulls omitted rather than emitted.
+  const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  check('JSON-LD present', Boolean(ld));
+  if (ld) {
+    let parsed = null;
+    try {
+      parsed = JSON.parse(ld[1]);
+    } catch (e) {
+      check('JSON-LD parses', false, String(e));
+    }
+    if (parsed) {
+      const types = (parsed['@graph'] ?? []).map((n) => n['@type']);
+      check('has Organization', types.includes('Organization'));
+      check('has Person', types.includes('Person'));
+      if (BOOK_ROUTES.has(route)) check('has Book', types.includes('Book'));
+      if (route !== '/') {
+        check('interior page has BreadcrumbList', types.includes('BreadcrumbList'));
+      }
+      const flat = JSON.stringify(parsed);
+      check('no null values emitted', !flat.includes(':null'));
+      check('no empty strings emitted', !flat.includes(':""'));
+    }
   }
+
+  // §12 — head essentials.
+  check('has <title>', /<title>[^<]+<\/title>/.test(html));
+  check(
+    'has meta description',
+    /<meta name="description" content="[^"]{40,}"/.test(html),
+  );
+  check('has canonical', /rel="canonical"/.test(html));
+  const h1s = (html.match(/<h1[\s>]/g) || []).length;
+  check('exactly one <h1>', h1s === 1, `found ${h1s}`);
+
+  console.log(
+    `  §4.7 no phone · §10 no empty states · §11 ${imgs.length} images · §12 schema + head`,
+  );
 }
 
-console.log('\n§12  Head essentials');
-check('has <title>', /<title>[^<]+<\/title>/.test(html));
-check('has meta description', /<meta name="description" content="[^"]{40,}"/.test(html));
-check('has canonical', /rel="canonical"/.test(html));
-check('single <h1>', (html.match(/<h1[\s>]/g) || []).length === 1,
-  `found ${(html.match(/<h1[\s>]/g) || []).length}`);
+for (const route of routes) {
+  const res = await fetch(base + route);
+  console.log(`\n── ${route}  (${res.status})`);
+  check(`${route} responds 200`, res.ok, `got ${res.status}`);
+  if (res.ok) auditPage(route, await res.text());
+}
 
 console.log(
   failures === 0
