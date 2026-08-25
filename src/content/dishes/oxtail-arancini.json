@@ -1,0 +1,9 @@
+{
+  "name": "Oxtail Arancini",
+  "shortName": "Oxtail Arancini",
+  "image": "../../assets/food/oxtail-arancini.jpg",
+  "alt": "Oxtail Arancini: golden breadcrumbed risotto balls on a dark speckled plate, one broken open to show braised oxtail and creamy risotto inside, served with a small white ramekin of marinara and finished with grated parmesan and chopped parsley.",
+  "plateTone": "dark",
+  "order": 3,
+  "featured": false
+}

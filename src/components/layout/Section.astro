@@ -1,0 +1,105 @@
+---
+/**
+ * Section — a room (§6.4).
+ *
+ * Owns three things and nothing else:
+ *   1. which room it is (ink or cream), and therefore every colour its
+ *      children inherit through --room-*;
+ *   2. the vertical rhythm — --section-y top and bottom, generously;
+ *   3. its segment of the meeting line.
+ *
+ * Layout inside a section is the child's business. Section deliberately does
+ * not set a grid, so child padding and section padding can never fight: the
+ * child receives a plain block container at --max-w with page gutters.
+ *
+ * `bleed` drops the inner container entirely for sections whose content must
+ * reach the viewport edge (the hero photograph). Those children handle their
+ * own gutters.
+ */
+import MeetingLine from './MeetingLine.astro';
+
+interface Props {
+  tone: 'ink' | 'cream';
+  id?: string;
+  /** Labels the section for assistive tech; pairs with the visible heading. */
+  labelledby?: string;
+  bleed?: boolean;
+  /** Trim vertical padding — used by the hero, which sizes to the viewport. */
+  flush?: 'none' | 'top' | 'bottom' | 'both';
+  /**
+   * Vertical rhythm. `tight` is for the footer, which is a closing block
+   * rather than a room. Exposed as a prop because a child cannot restyle this
+   * element: Astro scopes the child's CSS to the child's own template, and
+   * this root carries Section's scope id, not theirs.
+   */
+  space?: 'default' | 'tight';
+  lineCap?: 'none' | 'top' | 'bottom' | 'both';
+  class?: string;
+  as?: 'section' | 'div' | 'footer';
+}
+
+const {
+  tone,
+  id,
+  labelledby,
+  bleed = false,
+  flush = 'none',
+  space = 'default',
+  lineCap = 'none',
+  class: className = '',
+  as: Tag = 'section',
+} = Astro.props;
+---
+
+<Tag
+  id={id}
+  aria-labelledby={labelledby}
+  class:list={[
+    'section',
+    `room-${tone}`,
+    space !== 'default' && `section--space-${space}`,
+    flush !== 'none' && `section--flush-${flush}`,
+    className,
+  ]}
+>
+  <MeetingLine cap={lineCap} />
+  {
+    bleed ? (
+      <div class="section__bleed"><slot /></div>
+    ) : (
+      <div class="section__inner"><slot /></div>
+    )
+  }
+</Tag>
+
+<style>
+  .section {
+    /* No z-index here: a stacking context would trap the inner content
+       beneath the meeting line. position:relative alone is enough. */
+    position: relative;
+    background: var(--room-bg);
+    color: var(--room-text);
+    padding-block: var(--section-y);
+  }
+
+  .section--space-tight { --section-y: clamp(4.5rem, 9vh, 7rem); }
+
+  .section--flush-top { padding-block-start: 0; }
+  .section--flush-bottom { padding-block-end: 0; }
+  .section--flush-both { padding-block: 0; }
+
+  .section__inner {
+    position: relative;
+    z-index: 2; /* above the meeting line, which sits at 1 */
+    width: 100%;
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section__bleed {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+  }
+</style>

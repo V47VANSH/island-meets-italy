@@ -1,0 +1,167 @@
+---
+/**
+ * Footer (§4.8).
+ *
+ * Everything here that the client has not yet supplied degrades to nothing
+ * rather than to a placeholder (§10): no social row until the links arrive, no
+ * mailto until the official address arrives, and never a telephone number.
+ */
+import { site, socialLinks } from '@/config/site';
+import Section from './Section.astro';
+
+const year = 2026; // fixed per approved copy in §4.1
+
+const footerLinks = [
+  { label: 'Contact', href: '/contact' },
+  { label: 'Media', href: '/media' },
+  { label: 'Cookbook', href: '/cookbook' },
+];
+---
+
+<Section as="footer" tone="ink" space="tight" lineCap="bottom" class="footer">
+  <div class="footer__grid">
+    <div class="footer__identity">
+      {/* Placeholder mark until David supplies the official logo (§14). */}
+      <p class="footer__wordmark display">Island Meets Italy</p>
+      <p class="footer__tagline">{site.tagline}</p>
+      <p class="footer__chef utility">
+        {site.chef.name} — {site.chef.title}
+      </p>
+    </div>
+
+    <div class="footer__links">
+      <nav aria-label="Footer">
+        <ul class="footer__list">
+          {
+            footerLinks.map((link) => (
+              <li>
+                <a class="footer__link" href={link.href}>{link.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      {
+        socialLinks.length > 0 && (
+          <ul class="footer__social" aria-label="Social">
+            {socialLinks.map((social) => (
+              <li>
+                <a
+                  class="footer__link"
+                  href={social.href}
+                  rel="noopener noreferrer me"
+                >
+                  {social.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        site.contact.email && (
+          <a class="footer__link footer__email" href={`mailto:${site.contact.email}`}>
+            {site.contact.email}
+          </a>
+        )
+      }
+    </div>
+  </div>
+
+  <p class="footer__legal">
+    © {year} {site.legalName} All Rights Reserved.
+  </p>
+</Section>
+
+<style>
+  .footer__grid {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 900px) {
+    .footer__grid {
+      /* Identity left of the meeting axis, links right of it. */
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .footer__links { padding-inline-start: clamp(2rem, 5vw, 5rem); }
+  }
+
+  .footer__wordmark {
+    font-size: var(--step-3);
+    line-height: 1;
+    letter-spacing: 0.005em;
+  }
+
+  .footer__tagline {
+    margin-block-start: 0.9rem;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 24, 'WONK' 0;
+    font-size: var(--step-1);
+    line-height: 1.3;
+    color: var(--room-mute);
+  }
+
+  .footer__chef {
+    margin-block-start: 1.5rem;
+    color: var(--room-accent);
+  }
+
+  .footer__list,
+  .footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.75rem;
+  }
+  .footer__social { margin-block-start: 1.25rem; }
+
+  .footer__link {
+    position: relative;
+    display: inline-block;
+    padding-block: 0.5rem;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    text-decoration: none;
+    color: var(--room-mute);
+    transition: color var(--dur-link) var(--ease-signature);
+  }
+  .footer__link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0.25rem;
+    height: 1px;
+    background: var(--room-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-link) var(--ease-signature);
+  }
+  .footer__link:hover,
+  .footer__link:focus-visible { color: var(--room-text); }
+  .footer__link:hover::after,
+  .footer__link:focus-visible::after { transform: scaleX(1); }
+
+  .footer__email {
+    display: inline-block;
+    margin-block-start: 1.25rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .footer__legal {
+    margin-block-start: clamp(3rem, 7vh, 5rem);
+    padding-block-start: 1.75rem;
+    border-block-start: 1px solid var(--room-rule);
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    letter-spacing: 0.03em;
+    color: var(--room-mute);
+  }
+</style>

@@ -1,0 +1,294 @@
+---
+/**
+ * Header (§6.5).
+ *
+ * Six links plus one button — seven nav items in a row would be heavy, so
+ * BUY THE BOOK is visually separated as a bordered gold button. It is live from
+ * day one; until the real purchase URL exists it points at /cookbook, with no
+ * visual difference (§10).
+ *
+ * Transparent over the hero, then a solid bar with a hairline bottom rule after
+ * 80px of scroll. Inverts to cream with dark text while it overlaps a cream
+ * room. `transition:persist` keeps it from flickering between routes (§6.6).
+ */
+import { site, buyUrl } from '@/config/site';
+import MobileNav from './MobileNav.astro';
+
+const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
+---
+
+<header class="header" data-header transition:persist>
+  <div class="header__inner">
+    <a class="header__brand" href="/" aria-label={`${site.name} — home`}>
+      <span class="header__wordmark">Island <em>Meets</em> Italy</span>
+    </a>
+
+    <nav class="header__nav" aria-label="Primary">
+      <ul class="header__links">
+        {
+          site.nav.map((item) => (
+            <li>
+              <a
+                class="header__link"
+                href={item.href}
+                aria-current={item.href === currentPath ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <a class="header__buy" href={buyUrl}>Buy the Book</a>
+      <div class="header__menu">
+        <MobileNav />
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: 50;
+    height: var(--header-h);
+    /* Over the hero the header is transparent. These five are the only things
+       that change between its states — all of them room tokens, never a
+       hardcoded value. */
+    --header-bg: transparent;
+    --header-text: var(--text-on-dark);
+    --header-mute: var(--text-on-dark-mute);
+    --header-accent: var(--gold);
+    --header-rule: transparent;
+
+    background: var(--header-bg);
+    color: var(--header-text);
+    border-block-end: 1px solid var(--header-rule);
+    transition:
+      background-color var(--dur-link) var(--ease-signature),
+      color var(--dur-link) var(--ease-signature),
+      border-color var(--dur-link) var(--ease-signature);
+  }
+
+  .header[data-scrolled] {
+    --header-bg: var(--ink);
+    --header-rule: var(--rule-dark);
+  }
+
+  /* Inverted while the bar overlaps a cream room (§6.5). Gold text would fail
+     contrast there, so the accent drops to --gold-deep (§6.2). */
+  .header[data-room='cream'] {
+    --header-text: var(--text-on-light);
+    --header-mute: var(--text-on-light-mute);
+    --header-accent: var(--gold-deep);
+  }
+  .header[data-room='cream'][data-scrolled] {
+    --header-bg: var(--cream);
+    --header-rule: var(--rule-light);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Three things have to fit on a 360px phone: the mark, BUY THE BOOK — whose
+       label is fixed by the approved copy — and the menu trigger. The bar runs
+       a little tighter than the page gutter below 600px to make room. */
+    gap: 0.4rem;
+    height: 100%;
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 600px) {
+    .header__inner {
+      gap: clamp(1rem, 3vw, 2.5rem);
+      padding-inline: var(--gutter);
+    }
+  }
+
+  /* ── Wordmark ─────────────────────────────────────────────────────────
+     Placeholder until David supplies the official logo (§14). A real
+     typographic mark, so nothing on the page reads as missing. */
+  .header__brand {
+    flex: 0 0 auto;
+    text-decoration: none;
+  }
+  .header__wordmark {
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 24, 'WONK' 0;
+    font-size: clamp(0.75rem, 0.5rem + 1.4vw, 1.13rem);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--header-text);
+    white-space: nowrap;
+  }
+  .header__wordmark em {
+    font-style: normal;
+    color: var(--header-accent);
+  }
+
+  /* ── Links ──────────────────────────────────────────────────────────── */
+  .header__nav { flex: 1 1 auto; }
+
+  .header__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 2.4vw, 2.25rem);
+  }
+
+  .header__link {
+    position: relative;
+    display: inline-block;
+    padding-block: 0.75rem;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--header-mute);
+    transition: color var(--dur-link) var(--ease-signature);
+  }
+
+  /* Gold underline wiping in from the left, 220ms (§6.6). */
+  .header__link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0.35rem;
+    height: 1px;
+    background: var(--header-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-link) var(--ease-signature);
+  }
+
+  .header__link:hover,
+  .header__link:focus-visible,
+  .header__link[aria-current='page'] {
+    color: var(--header-text);
+  }
+
+  .header__link:hover::after,
+  .header__link:focus-visible::after,
+  .header__link[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  /* ── Actions ────────────────────────────────────────────────────────── */
+  .header__actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .header__buy {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.625rem;
+    border: 1px solid var(--header-accent);
+    color: var(--header-accent);
+    font-family: var(--font-body);
+    font-size: clamp(0.72rem, 0.6rem + 0.5vw, 0.9rem);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      background-color var(--dur-micro) var(--ease-signature),
+      color var(--dur-micro) var(--ease-signature);
+  }
+  .header__buy:hover {
+    background: var(--header-accent);
+    color: var(--ink);
+  }
+  .header[data-room='cream'] .header__buy:hover { color: var(--cream); }
+
+  @media (min-width: 600px) {
+    .header__buy {
+      padding-inline: 1.25rem;
+      letter-spacing: var(--tracking-utility);
+    }
+  }
+
+  /* Mobile first: the link row is the enhancement, the menu is the base. */
+  .header__nav { display: none; }
+  .header__menu { display: block; }
+
+  @media (min-width: 1100px) {
+    .header__nav { display: block; }
+    .header__menu { display: none; }
+  }
+</style>
+
+
+<script>
+  /**
+   * Two pieces of header state, both rebuilt on every page load: the header
+   * persists across route changes (§6.6) and would otherwise keep observing
+   * sections that no longer exist.
+   *
+   *   data-scrolled — solid bar after 80px of scroll (§6.5)
+   *   data-room     — inverts to cream while the bar overlaps a cream room
+   */
+  let teardown: (() => void) | null = null;
+
+  function initHeader() {
+    teardown?.();
+
+    const header = document.querySelector<HTMLElement>('[data-header]');
+    if (!header) return;
+
+    const onScroll = () => {
+      header.toggleAttribute('data-scrolled', window.scrollY > 80);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Which room sits under the bar? Shrink the viewport rectangle down to a
+    // strip the height of the header and see which section occupies it.
+    const barHeight = header.offsetHeight;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          if (entry.target.classList.contains('room-cream')) {
+            header.setAttribute('data-room', 'cream');
+          } else {
+            header.removeAttribute('data-room');
+          }
+        }
+      },
+      {
+        rootMargin: `0px 0px -${Math.max(0, window.innerHeight - barHeight)}px 0px`,
+      },
+    );
+
+    document
+      .querySelectorAll<HTMLElement>('.room-ink, .room-cream')
+      .forEach((room) => observer.observe(room));
+
+    teardown = () => {
+      window.removeEventListener('scroll', onScroll);
+      observer.disconnect();
+      teardown = null;
+    };
+  }
+
+  initHeader();
+  document.addEventListener('astro:page-load', initHeader);
+</script>

@@ -1,0 +1,212 @@
+---
+/**
+ * Cookbook feature (§7.1) — ink, because the arancini is on a dark plate.
+ *
+ * Enters from the right, the opposite side to the food feature above it, so
+ * the eye crosses the meeting line again (§6.1).
+ *
+ * The official book cover is still pending (§14). Rather than a placeholder
+ * box or a "coming soon" label — both forbidden by §10 — the arancini carries
+ * the section on its own until the cover arrives. Drop the file at
+ * `src/assets/book/cover.jpg` (or .png/.webp/.avif) and it appears as the
+ * primary image with the arancini stepping back to the offset secondary role
+ * §7.1 describes. No template edit, no layout shift.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import { site, buyUrl } from '@/config/site';
+
+const coverModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/book/cover.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+const cover = Object.values(coverModules)[0]?.default ?? null;
+
+const dishes = await getCollection('dishes');
+const arancini =
+  dishes.find((d) => d.id === 'oxtail-arancini') ??
+  dishes.filter((d) => d.data.plateTone === 'dark' && !d.data.featured)[0];
+---
+
+<Section tone="ink" labelledby="cookbook-title" bleed class="cookbook">
+  <div class="cookbook__grid" data-has-cover={cover ? '' : undefined}>
+    <div class="cookbook__copy">
+      <div data-reveal>
+        <Eyebrow>The Debut Cookbook</Eyebrow>
+        <h2 class="cookbook__title display" id="cookbook-title">
+          Island Meets Italy — Volume 1: Foundations of Flavor
+        </h2>
+      </div>
+
+      <div class="cookbook__text" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        <p class="prose">
+          The first cookbook from Chef Kenton Lowrie introduces home cooks to
+          the foundations behind his Jamaican-Italian cooking, from signature
+          sauces and seasonings to pasta, seafood, risotto, mains, cocktails and
+          desserts.
+        </p>
+        <p class="prose">
+          With clear instructions, chef's notes, serving suggestions and
+          professional techniques, Foundations of Flavor is designed to help
+          home cooks build confidence and create restaurant-quality food in
+          their own kitchens.
+        </p>
+      </div>
+
+      <div class="cookbook__actions" data-reveal style="--reveal-delay: calc(var(--stagger) * 2)">
+        <Button href="/cookbook" variant="filled">Discover the Book</Button>
+        <Button href={buyUrl} variant="outlined">Buy the Book</Button>
+      </div>
+    </div>
+
+    <div class="cookbook__media">
+      {
+        cover && (
+          <figure class="cookbook__cover" data-reveal>
+            <Image
+              src={cover}
+              alt={`${site.book.title} — ${site.book.volume}, front cover`}
+              widths={[400, 800, 1200]}
+              sizes="(min-width: 900px) 28rem, 70vw"
+              loading="lazy"
+              class="cookbook__coverimg"
+            />
+          </figure>
+        )
+      }
+
+      <figure class="cookbook__dish" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        <Image
+          src={arancini.data.image}
+          alt={arancini.data.alt}
+          widths={[400, 800, 1080]}
+          sizes="(min-width: 900px) 38vw, 100vw"
+          loading="lazy"
+          class="cookbook__dishimg"
+        />
+      </figure>
+    </div>
+  </div>
+</Section>
+
+<style>
+  /* ── Mobile (base) ──────────────────────────────────────────────────── */
+
+  .cookbook__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vh, 3.5rem);
+  }
+
+  .cookbook__copy {
+    order: 2;
+    padding-inline: var(--gutter);
+  }
+
+  .cookbook__media {
+    order: 1;
+    display: grid;
+    gap: clamp(1.5rem, 4vh, 2rem);
+  }
+
+  .cookbook__title {
+    margin-block-start: 1.25rem;
+    font-size: var(--step-3);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .cookbook__text { margin-block-start: clamp(1.5rem, 3vh, 2rem); }
+  .cookbook__text :global(.prose) { color: var(--room-mute); }
+
+  .cookbook__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-block-start: clamp(2rem, 4vh, 2.75rem);
+  }
+  .cookbook__actions > :global(.btn) { flex: 1 1 14rem; }
+
+  .cookbook__cover,
+  .cookbook__dish { margin: 0; }
+
+  .cookbook__cover { padding-inline: var(--gutter); }
+
+  .cookbook__coverimg {
+    width: min(100%, 20rem);
+    height: auto;
+  }
+
+  .cookbook__dishimg {
+    width: 100%;
+    aspect-ratio: var(--photo-portrait);
+    object-fit: cover;
+    object-position: center 55%;
+  }
+
+  /* ── Desktop: enters from the right (§6.1) ──────────────────────────── */
+
+  @media (min-width: 900px) {
+    .cookbook__grid {
+      /* The first column ends exactly on the meeting line, so the copy stops
+         at the axis instead of spilling across it. */
+      grid-template-columns: calc(var(--axis-x) - var(--edge-x)) 1fr;
+      align-items: center;
+      padding-inline-start: var(--edge-x);
+    }
+
+    .cookbook__copy {
+      order: 1;
+      padding-inline: 0 clamp(1.75rem, 4vw, 3.5rem);
+      max-width: 36rem;
+      justify-self: end;
+    }
+
+    .cookbook__media {
+      order: 2;
+      gap: 0;
+      align-items: center;
+      /* Bleeds off the right edge of the section (§7.1). */
+      justify-self: end;
+      width: min(100%, 42vw);
+    }
+
+    .cookbook__actions > :global(.btn) { flex: 0 0 auto; }
+
+    .cookbook__dishimg {
+      aspect-ratio: var(--photo-portrait);
+      object-position: center;
+    }
+
+    /* With the cover in place the arancini becomes the offset secondary
+       image, overlapping the section edge as §7.1 describes. */
+    [data-has-cover] .cookbook__media {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+    [data-has-cover] .cookbook__cover {
+      grid-area: 1 / 1;
+      z-index: 2;
+      padding-inline: 0;
+      justify-self: start;
+    }
+    [data-has-cover] .cookbook__coverimg {
+      width: min(100%, 28rem);
+    }
+    [data-has-cover] .cookbook__dish {
+      grid-area: 1 / 1;
+      z-index: 1;
+      justify-self: end;
+      width: 58%;
+      align-self: end;
+      transform: translateY(18%);
+    }
+    [data-has-cover] .cookbook__dishimg { aspect-ratio: var(--photo-portrait); }
+  }
+</style>

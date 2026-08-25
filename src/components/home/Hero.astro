@@ -1,0 +1,254 @@
+---
+/**
+ * Hero (§7.1) — the thesis and the signature working together.
+ *
+ * Mobile is the base layout, not a reduction of the desktop one (§6.4): the
+ * photograph runs full-bleed across the top at ~55svh, the wordmark stacks
+ * beneath it with MEETS crossing the scroll spine in the left margin, then the
+ * copy. At 900px the layout becomes the split described in §7.1 — ISLAND left
+ * of the meeting line, ITALY right of it, MEETS straddling it in gold, copy
+ * left of the axis and the photograph right of it, bleeding off the edge.
+ *
+ * DEVIATION, flagged. §7.1 asks for a 55/45 split with the wordmark inside the
+ * left column *and* straddling the page-centre rule at --step-5. Those cannot
+ * both hold: at --step-5 on a 1440px viewport ITALY alone is ~340px wide and
+ * would run from the axis (720px) to ~1060px, well inside a 45% image column
+ * beginning at 792px. So the wordmark takes the full width and genuinely
+ * straddles the axis, and the split happens on the row beneath it — copy left,
+ * photograph right, still full-bleed. Everything §7.1 asks for is present; only
+ * the stacking order of the split changed.
+ *
+ * The photograph is sized by height at its native 3:4 on desktop, so it is
+ * never cropped to landscape — §5.2 warns that none of the four are landscape.
+ */
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+
+const dishes = await getCollection('dishes');
+// Hero art direction is data-driven: the dark-plate dish flagged `featured`
+// with the highest order. Changing the hero photograph is a content edit.
+const heroDish =
+  dishes
+    .filter((d) => d.data.plateTone === 'dark' && d.data.featured)
+    .sort((a, b) => b.data.order - a.data.order)[0] ?? dishes[0];
+---
+
+<Section tone="ink" labelledby="hero-title" bleed flush="both" lineCap="top" class="hero">
+  <div class="hero__grid">
+    <figure class="hero__figure">
+      <Image
+        src={heroDish.data.image}
+        alt={heroDish.data.alt}
+        widths={[480, 800, 1080]}
+        sizes="(min-width: 900px) 36rem, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="hero__image"
+      />
+    </figure>
+
+    <h1 class="hero__wordmark" id="hero-title">
+      <span class="visually-hidden">Island Meets Italy</span>
+      <span class="hero__word hero__word--island display" aria-hidden="true">Island</span>
+      <span class="hero__word hero__word--meets display" aria-hidden="true">Meets</span>
+      <span class="hero__word hero__word--italy display" aria-hidden="true">Italy</span>
+    </h1>
+
+    <div class="hero__copy">
+      <p class="hero__tagline display">Where Island Soul Meets Italian Heart</p>
+
+      <p class="hero__journey utility">
+        Jamaican soul. Italian tradition. One culinary journey.
+      </p>
+
+      <p class="hero__intro prose">
+        Created by Chef Kenton Lowrie, Island Meets Italy brings together the
+        bold flavours of Jamaica and the timeless traditions of Italian cuisine
+        through food built on strong foundations, quality ingredients and
+        genuine passion.
+      </p>
+
+      <div class="hero__actions">
+        <Button href="/cookbook" variant="filled">Explore the Cookbook</Button>
+        <Button href="/about" variant="outlined">Meet Chef Kenton</Button>
+      </div>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ── Mobile (base) ──────────────────────────────────────────────────── */
+
+  /* Header clearance lives on the grid, not on the section. Section owns
+     section padding; a child that also sets padding-block on the same element
+     is a specificity coin-toss with .section--flush-*. */
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding-inline: var(--gutter);
+    padding-block: var(--header-h) clamp(3rem, 8vh, 4.5rem);
+  }
+
+  /* Photograph first: portrait, ~55svh, full-bleed across the top. */
+  .hero__figure {
+    margin: 0 calc(var(--gutter) * -1);
+  }
+
+  .hero__image {
+    width: 100vw;
+    height: 55svh;
+    object-fit: cover;
+    object-position: center 42%;
+  }
+
+  .hero__wordmark {
+    display: block;
+    padding-block-start: clamp(2rem, 6vh, 3rem);
+  }
+
+  .hero__word {
+    display: block;
+    font-size: var(--step-4);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+  }
+
+  /* MEETS crosses the scroll spine out in the left margin. */
+  .hero__word--meets {
+    margin-inline-start: -1rem;
+    font-size: var(--step-2);
+    color: var(--gold);
+    letter-spacing: 0.02em;
+  }
+
+  .hero__copy { padding-block-start: 1.75rem; }
+
+  .hero__tagline {
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--room-mute);
+  }
+
+  .hero__journey {
+    margin-block-start: 1.5rem;
+    color: var(--gold);
+  }
+
+  .hero__intro {
+    margin-block-start: 1.5rem;
+    color: var(--room-mute);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-block-start: clamp(2rem, 4vh, 2.75rem);
+  }
+  .hero__actions > :global(.btn) { flex: 1 1 14rem; }
+
+  /* ── Desktop: the split hero (§7.1) ─────────────────────────────────── */
+
+  @media (min-width: 900px) {
+    /* The viewport sizing lives on the grid, not on the section root: a child
+       component's scoped CSS never matches the Section element, which carries
+       Section's own scope id. */
+    .hero__grid {
+      min-height: 100svh;
+      /* The column boundary IS the meeting line. Everything aligns to it. */
+      grid-template-columns: var(--axis-x) 1fr;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      align-content: start;
+      padding-inline: 0;
+      /* Clears the fixed header, and keeps the whole hero inside one viewport.
+         No bottom padding: the photograph runs to the section edge. The copy
+         column carries its own. */
+      padding-block: calc(var(--header-h) + clamp(0.5rem, 2vh, 1.25rem)) 0;
+    }
+
+    .hero__wordmark { display: contents; }
+
+    .hero__word {
+      font-size: var(--step-5);
+      line-height: 0.92;
+    }
+
+    .hero__word--island {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: end;
+      /* Optical: uppercase Fraunces carries a little right side bearing. */
+      margin-inline-end: -0.04em;
+    }
+
+    .hero__word--meets {
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: end;
+      /* Centred on the column boundary — straddling the line. */
+      transform: translateX(50%);
+      margin-inline-start: 0;
+      font-size: var(--step-3);
+    }
+
+    .hero__word--italy {
+      grid-column: 2;
+      grid-row: 3;
+      justify-self: start;
+      margin-inline-start: -0.03em;
+    }
+
+    .hero__copy {
+      grid-column: 1;
+      grid-row: 4;
+      align-self: center;
+      padding-inline: var(--edge-x) clamp(1.5rem, 4vw, 4rem);
+      padding-block: clamp(2rem, 5vh, 3.5rem);
+    }
+
+    .hero__intro { max-width: 46ch; }
+
+    .hero__actions > :global(.btn) { flex: 0 0 auto; }
+
+    .hero__figure {
+      grid-column: 2;
+      grid-row: 4;
+      /* `justify-self: end` rather than an auto margin — a stretched grid item
+         ignores its aspect-ratio and fills the column instead. */
+      justify-self: end;
+      /* Sits on the bottom edge of the section, which carries no padding. */
+      align-self: end;
+      margin: 0;
+      padding: 0;
+      /* Height is bound to the viewport, not to the grid row. The row has no
+         definite height, so `height: 100%` here would resolve to auto, the
+         aspect-ratio would then derive height from max-width, and the row
+         would grow to fit it — inflating the hero past one viewport.
+         Driving from svh breaks that loop and keeps the box exact, so the
+         photograph is never cropped towards landscape (§5.2). */
+      height: clamp(20rem, 62svh, 42rem);
+      aspect-ratio: var(--photo-portrait);
+      max-width: 100%;
+    }
+
+    .hero__image {
+      width: 100%;
+      height: 100%;
+      object-position: center;
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+/**
+ * Brand introduction (§7.1) — ink, type only.
+ *
+ * No image here on purpose: this section earns its keep by being the breath
+ * between two photographic moments. The heading sits left of the meeting line
+ * and the paragraphs right of it, so the eye crosses the axis reading it.
+ */
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+---
+
+<Section tone="ink" labelledby="brand-intro-title" class="brand">
+  <div class="brand__grid">
+    <div class="brand__headingwrap" data-reveal>
+      <h2 class="brand__heading display" id="brand-intro-title">
+        Two Cultures.<br />One Table.
+      </h2>
+    </div>
+
+    <div class="brand__body">
+      <div data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        <p class="prose">
+          Island Meets Italy was born from a simple idea: two culinary
+          traditions separated by geography, yet connected by family, passion
+          and the joy of sharing great food.
+        </p>
+        <p class="prose">
+          The food respects what makes Jamaican and Italian cooking distinctive
+          while finding natural places where the two can meet. Familiar flavours
+          become something new without losing the character of either tradition.
+        </p>
+      </div>
+
+      <div class="brand__actions" data-reveal style="--reveal-delay: calc(var(--stagger) * 2)">
+        <Button href="/about" variant="outlined">Discover Island Meets Italy</Button>
+      </div>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .brand__grid {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 4rem) 0;
+    grid-template-columns: 1fr;
+  }
+
+  .brand__heading {
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  .brand__body > :global(* + *) { margin-block-start: 1.35em; }
+
+  .brand__actions { margin-block-start: clamp(2rem, 4vh, 2.75rem); }
+
+  @media (min-width: 900px) {
+    .brand__grid {
+      /* The column boundary is the meeting line. */
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .brand__headingwrap {
+      grid-column: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .brand__body {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+      /* Drops the paragraphs below the heading's first line, so the two
+         blocks read as a conversation across the axis rather than a table. */
+      padding-block-start: clamp(0.5rem, 2vh, 1.5rem);
+    }
+
+    .brand__body :global(.prose) { color: var(--room-mute); }
+  }
+</style>

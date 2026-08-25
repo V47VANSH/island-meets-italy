@@ -1,0 +1,244 @@
+---
+/**
+ * MobileNav — the full-screen navigation overlay (§6.4, §11).
+ *
+ * Traps focus while open, closes on Escape, returns focus to the trigger and
+ * locks background scroll. BUY THE BOOK stays out in the header bar rather than
+ * moving in here, so the primary action is never hidden behind a menu.
+ *
+ * DEVIATION, flagged. §9 lists this as a React island (`islands/MobileNav.tsx`)
+ * and §8 allows React "only where needed". React was not needed here, and it
+ * was expensive: react + react-dom is 57.3 KB gzipped, which by itself broke
+ * the §13 budget of under 40 KB of JS for the whole site — 86% of the page's
+ * JavaScript, to open a menu. As plain markup plus the script below the same
+ * behaviour costs about 1 KB and the homepage now ships ~9 KB total.
+ *
+ * The React integration stays installed and configured, so Phase 2 can still
+ * use it for the contact form or the lightbox if those genuinely earn it.
+ */
+import { site } from '@/config/site';
+
+const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
+---
+
+<div class="mobile-nav" data-mobile-nav>
+  <button
+    type="button"
+    class="mobile-nav__trigger"
+    aria-expanded="false"
+    aria-controls="mobile-nav-panel"
+    aria-label="Open menu"
+    data-mobile-nav-trigger
+  >
+    <span class="mobile-nav__bars" aria-hidden="true">
+      <span></span><span></span>
+    </span>
+  </button>
+
+  <div
+    id="mobile-nav-panel"
+    class="mobile-nav__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Site navigation"
+    data-mobile-nav-panel
+    hidden
+  >
+    <nav class="mobile-nav__list" aria-label="Primary">
+      {
+        site.nav.map((item, i) => (
+          <a
+            class="mobile-nav__link"
+            href={item.href}
+            aria-current={item.href === currentPath ? 'page' : undefined}
+            style={`transition-delay: calc(var(--stagger) * ${i})`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+    <p class="mobile-nav__tagline">{site.tagline}</p>
+  </div>
+</div>
+
+<script>
+  const FOCUSABLE = 'a[href], button:not([disabled])';
+
+  function initMobileNav() {
+    const root = document.querySelector<HTMLElement>('[data-mobile-nav]');
+    if (!root || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const trigger = root.querySelector<HTMLButtonElement>('[data-mobile-nav-trigger]');
+    const panel = root.querySelector<HTMLElement>('[data-mobile-nav-panel]');
+    if (!trigger || !panel) return;
+
+    let open = false;
+    let previousOverflow = '';
+
+    const setOpen = (next: boolean, restoreFocus = true) => {
+      if (next === open) return;
+      open = next;
+
+      trigger.setAttribute('aria-expanded', String(open));
+      trigger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      trigger.querySelector('.mobile-nav__bars')?.toggleAttribute('data-open', open);
+
+      if (open) {
+        panel.hidden = false;
+        // Next frame, so the panel has a layout to transition from.
+        requestAnimationFrame(() => panel.setAttribute('data-open', ''));
+        previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        panel.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+      } else {
+        panel.removeAttribute('data-open');
+        document.body.style.overflow = previousOverflow;
+        const hide = () => {
+          if (!open) panel.hidden = true;
+        };
+        // Wait out the fade unless motion is off, in which case hide at once.
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) hide();
+        else window.setTimeout(hide, 240);
+        if (restoreFocus) trigger.focus();
+      }
+    };
+
+    trigger.addEventListener('click', () => setOpen(!open));
+
+    // Links close the overlay; ClientRouter handles the navigation itself.
+    panel.querySelectorAll('a[href]').forEach((link) => {
+      link.addEventListener('click', () => setOpen(false, false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (!open) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) return;
+
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    // The header persists across routes, so the overlay must be closed by hand
+    // before a swap or it would survive into the next page.
+    document.addEventListener('astro:before-swap', () => setOpen(false, false));
+  }
+
+  initMobileNav();
+  document.addEventListener('astro:page-load', initMobileNav);
+</script>
+
+<style>
+  .mobile-nav__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-nav__bars {
+    position: relative;
+    display: block;
+    width: 1.375rem;
+    height: 0.625rem;
+  }
+  .mobile-nav__bars span {
+    position: absolute;
+    inset-inline: 0;
+    height: 1px;
+    background: currentColor;
+    transition: transform var(--dur-link) var(--ease-signature);
+  }
+  .mobile-nav__bars span:first-child { top: 0; }
+  .mobile-nav__bars span:last-child { bottom: 0; }
+  .mobile-nav__bars[data-open] span:first-child {
+    transform: translateY(0.3125rem) rotate(45deg);
+  }
+  .mobile-nav__bars[data-open] span:last-child {
+    transform: translateY(-0.3125rem) rotate(-45deg);
+  }
+
+  .mobile-nav__panel {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2.5rem;
+    padding: var(--header-h) var(--gutter) var(--gutter);
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity var(--dur-link) var(--ease-signature);
+  }
+  .mobile-nav__panel[hidden] { display: none; }
+  .mobile-nav__panel[data-open] { opacity: 1; }
+
+  .mobile-nav__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-nav__link {
+    display: block;
+    padding-block: 0.5rem;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 24, 'WONK' 1;
+    font-size: var(--step-3);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-decoration: none;
+    color: var(--text-on-dark);
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity var(--dur-reveal) var(--ease-signature),
+      transform var(--dur-reveal) var(--ease-signature);
+  }
+  .mobile-nav__panel[data-open] .mobile-nav__link {
+    opacity: 1;
+    transform: none;
+  }
+  .mobile-nav__link[aria-current='page'] { color: var(--gold); }
+
+  .mobile-nav__tagline {
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    color: var(--text-on-dark-mute);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-nav__link {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

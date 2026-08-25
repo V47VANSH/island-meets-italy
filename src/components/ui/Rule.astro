@@ -1,0 +1,31 @@
+---
+/**
+ * Rule — a hairline. Horizontal by default, vertical on request.
+ * Takes its colour from the room, so it is never a hardcoded value.
+ */
+interface Props {
+  orientation?: 'horizontal' | 'vertical';
+  accent?: boolean;
+  class?: string;
+}
+const {
+  orientation = 'horizontal',
+  accent = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<span
+  class:list={['rule', `rule--${orientation}`, accent && 'rule--accent', className]}
+  aria-hidden="true"
+></span>
+
+<style>
+  .rule {
+    display: block;
+    background: var(--room-rule);
+  }
+  .rule--accent { background: var(--room-line); }
+  .rule--horizontal { width: 100%; height: 1px; }
+  .rule--vertical { width: 1px; height: 100%; }
+</style>

@@ -1,0 +1,46 @@
+---
+/**
+ * Home (§7.1).
+ *
+ * Phase 2, first half: hero through the cookbook feature. The chef
+ * introduction and media feature follow in the next pass, keeping the
+ * ink / cream / ink alternation of §6.4 going.
+ */
+import Base from '@/layouts/Base.astro';
+import Hero from '@/components/home/Hero.astro';
+import BrandIntro from '@/components/home/BrandIntro.astro';
+import FoodFeature from '@/components/home/FoodFeature.astro';
+import CookbookFeature from '@/components/home/CookbookFeature.astro';
+import { site } from '@/config/site';
+
+const title = 'Island Meets Italy — Chef Kenton Lowrie';
+const description =
+  'Jamaican soul. Italian tradition. One culinary journey. The culinary brand of Chef Kenton Lowrie, and the debut cookbook Volume 1: Foundations of Flavor.';
+
+/** Book, for the cookbook feature. Null config values are omitted, not
+ *  emitted as empty strings — invalid structured data is worse than none. */
+const bookSchema = {
+  '@type': 'Book',
+  name: `${site.book.title} — ${site.book.volume}`,
+  author: { '@id': `${site.url}/#kenton` },
+  publisher: site.book.publisher,
+  numberOfPages: site.book.pages,
+  bookFormat: 'https://schema.org/Paperback',
+  inLanguage: 'en',
+  ...(site.book.isbn ? { isbn: site.book.isbn } : {}),
+  ...(site.book.publicationDate ? { datePublished: site.book.publicationDate } : {}),
+  offers: {
+    '@type': 'Offer',
+    price: site.book.priceValue,
+    priceCurrency: site.book.currency,
+    ...(site.book.purchaseUrl ? { url: site.book.purchaseUrl } : {}),
+  },
+};
+---
+
+<Base title={title} description={description} schema={[bookSchema]}>
+  <Hero />
+  <BrandIntro />
+  <FoodFeature />
+  <CookbookFeature />
+</Base>

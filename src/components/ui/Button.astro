@@ -1,0 +1,85 @@
+---
+/**
+ * Button — filled or outlined, in the utility treatment (§6.3, §7.1).
+ *
+ * Colour comes from the room it sits in: --room-accent resolves to --gold on
+ * ink and --gold-deep on cream, so gold text can never land on a light
+ * background (§6.2). Renders <a> when given an href, <button> otherwise.
+ * Minimum target 44x44px (§11).
+ */
+interface Props {
+  href?: string;
+  variant?: 'filled' | 'outlined';
+  type?: 'button' | 'submit';
+  class?: string;
+  download?: string | boolean;
+}
+
+const {
+  href,
+  variant = 'outlined',
+  type = 'button',
+  class: className = '',
+  download,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+const isExternal = Boolean(href && /^https?:\/\//.test(href));
+---
+
+<Tag
+  class:list={['btn', `btn--${variant}`, className]}
+  {...href ? { href } : { type }}
+  {...download !== undefined ? { download } : {}}
+  {...isExternal ? { rel: 'noopener noreferrer' } : {}}
+>
+  <span class="btn__label"><slot /></span>
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.9rem 1.75rem;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-micro) var(--ease-signature),
+      color var(--dur-micro) var(--ease-signature),
+      border-color var(--dur-micro) var(--ease-signature);
+  }
+
+  .btn__label {
+    /* Nudge the optical centre: uppercase + tracking pushes text right. */
+    margin-right: calc(var(--tracking-utility) * -1);
+  }
+
+  .btn--filled {
+    background: var(--room-accent);
+    border-color: var(--room-accent);
+    color: var(--room-bg);
+  }
+  .btn--filled:hover {
+    background: transparent;
+    color: var(--room-accent);
+  }
+
+  .btn--outlined {
+    border-color: var(--room-line);
+    color: var(--room-text);
+  }
+  .btn--outlined:hover {
+    border-color: var(--room-accent);
+    color: var(--room-accent);
+  }
+</style>

@@ -1,0 +1,9 @@
+{
+  "name": "Mango Caprese",
+  "shortName": "Mango Caprese",
+  "image": "../../assets/food/mango-caprese.jpg",
+  "alt": "Mango Caprese: overlapping slices of ripe golden mango and fresh mozzarella arranged along a white rectangular plate, scattered with cracked black pepper, fine lime zest, pea shoots and a slick of olive oil.",
+  "plateTone": "light",
+  "order": 2,
+  "featured": false
+}

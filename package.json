@@ -1,0 +1,29 @@
+{
+  "name": "island-meets-italy",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "audit": "node scripts/audit.mjs",
+    "audit:contrast": "node scripts/contrast.mjs",
+    "photos": "node scripts/prepare-photos.mjs"
+  },
+  "dependencies": {
+    "@astrojs/react": "^6.0.4",
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^5.18.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sharp": "^0.35.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5"
+  }
+}

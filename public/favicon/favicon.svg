@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Island Meets Italy">
+  <!-- Placeholder mark until David supplies the official logo (§14).
+       The meeting line, which is the brand's own signature. -->
+  <rect width="64" height="64" fill="#0C0C0B"/>
+  <rect x="31" y="10" width="2" height="44" fill="#C8A551"/>
+  <rect x="16" y="30" width="9" height="2" fill="#F3EFE8"/>
+  <rect x="39" y="30" width="9" height="2" fill="#F3EFE8"/>
+</svg>

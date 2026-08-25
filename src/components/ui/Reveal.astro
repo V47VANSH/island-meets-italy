@@ -1,0 +1,31 @@
+---
+/**
+ * Reveal — scroll-in wrapper (§6.6).
+ *
+ * opacity 0 -> 1, translateY(12px -> 0), 700ms, cubic-bezier(0.16, 1, 0.3, 1),
+ * 60ms stagger between siblings. IntersectionObserver, rootMargin
+ * '0px 0px -12% 0px', fires once. The observer lives in Base.astro; the
+ * styling lives in global.css keyed on [data-reveal].
+ *
+ * Use this when an extra wrapper element is harmless. When the revealed
+ * element also carries layout — spacing, grid placement, flex — put
+ * `data-reveal` and `--reveal-delay` on that element directly instead:
+ * a parent's scoped CSS cannot style a child component's root element, so
+ * `<Reveal class="thing">` silently drops every rule `.thing` declares.
+ */
+interface Props {
+  /** Multiplied by --stagger to offset this element within a group. */
+  index?: number;
+  as?: 'div' | 'section' | 'li' | 'span' | 'p' | 'figure';
+  class?: string;
+}
+const { index = 0, as: Tag = 'div', class: className = '' } = Astro.props;
+---
+
+<Tag
+  class:list={[className]}
+  data-reveal
+  style={index ? `--reveal-delay: calc(var(--stagger) * ${index})` : undefined}
+>
+  <slot />
+</Tag>

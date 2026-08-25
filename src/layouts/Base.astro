@@ -1,0 +1,195 @@
+---
+/**
+ * Base layout — head, meta, transitions and structured data (§12, §13).
+ *
+ * Structured-data rule from §12: omit any property whose config value is null
+ * rather than emitting an empty string. Invalid structured data is worse than
+ * none. `buildSchema` below does that pruning centrally so no page has to.
+ */
+import { ClientRouter } from 'astro:transitions';
+import { site, sameAs } from '@/config/site';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+import '@/styles/global.css';
+
+export interface Props {
+  title: string;
+  description: string;
+  /**
+   * Path to the social preview image, relative to the site root. Omitted for
+   * now: per-page OG images are Phase 4 work (§15), and a tag pointing at a
+   * file that does not exist is exactly the broken reference §10 forbids.
+   */
+  ogImage?: string;
+  /** Extra JSON-LD nodes for this page, already pruned of nulls. */
+  schema?: Record<string, unknown>[];
+  /** Interior pages pass their trail; Home passes nothing (§12). */
+  breadcrumbs?: { name: string; href: string }[];
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description,
+  ogImage,
+  schema = [],
+  breadcrumbs,
+  bodyClass = '',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
+const ogImageUrl = ogImage
+  ? new URL(ogImage, Astro.site ?? site.url).href
+  : null;
+
+/** Person — Kenton. Used on Home and About (§12). */
+const personSchema: Record<string, unknown> = {
+  '@type': 'Person',
+  '@id': `${site.url}/#kenton`,
+  name: site.chef.name,
+  jobTitle: 'Professional Chef, Author, Founder',
+  worksFor: { '@id': `${site.url}/#organization` },
+  ...(sameAs.length > 0 ? { sameAs } : {}),
+};
+
+/** Organization — Island Meets Italy Inc. (§12). */
+const organizationSchema: Record<string, unknown> = {
+  '@type': 'Organization',
+  '@id': `${site.url}/#organization`,
+  name: site.name,
+  legalName: site.legalName,
+  url: site.url,
+  founder: { '@id': `${site.url}/#kenton` },
+  ...(sameAs.length > 0 ? { sameAs } : {}),
+  ...(site.contact.email
+    ? {
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'general enquiries',
+          email: site.contact.email,
+        },
+      }
+    : {}),
+};
+
+const breadcrumbSchema: Record<string, unknown>[] = breadcrumbs?.length
+  ? [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((crumb, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: crumb.name,
+          item: new URL(crumb.href, site.url).href,
+        })),
+      },
+    ]
+  : [];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [organizationSchema, personSchema, ...breadcrumbSchema, ...schema],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href={canonical} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    {/* Preload the display face only; the body face may swap (§13). */}
+    <link
+      rel="preload"
+      href="/fonts/fraunces-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_CA" />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+
+    <meta
+      name="twitter:card"
+      content={ogImageUrl ? 'summary_large_image' : 'summary'}
+    />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+
+    <meta name="theme-color" content="#0C0C0B" />
+    <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(jsonLd)}
+      is:inline
+    />
+
+    <ClientRouter />
+
+    <script is:inline>
+      // Marks the document as motion-capable before first paint, so Reveal can
+      // start hidden without a flash. Without JS, or with reduced motion, the
+      // class is never added and content is simply visible (§6.6).
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('js-reveal');
+      }
+    </script>
+  </head>
+
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <Header />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      /**
+       * Scroll reveals (§6.6): opacity and a 12px rise, fired once, with
+       * rootMargin '0px 0px -12% 0px'. Re-initialised on every page load
+       * because ClientRouter swaps the document body.
+       */
+      function initReveals() {
+        if (!document.documentElement.classList.contains('js-reveal')) return;
+
+        const targets = document.querySelectorAll<HTMLElement>(
+          '[data-reveal]:not(.is-revealed)',
+        );
+        if (targets.length === 0) return;
+
+        const observer = new IntersectionObserver(
+          (entries, obs) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-revealed');
+              obs.unobserve(entry.target);
+            }
+          },
+          { rootMargin: '0px 0px -12% 0px' },
+        );
+
+        targets.forEach((target) => observer.observe(target));
+      }
+
+      initReveals();
+      document.addEventListener('astro:page-load', initReveals);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+/**
+ * Island Meets Italy — token layer.
+ *
+ * EVERY colour, font and rhythm value in the site is declared here and nowhere
+ * else. No component contains a hex value or a font stack. When David supplies
+ * the official brand specifications, this file is the only one that changes.
+ *
+ * §6.2 colour, §6.3 typography, §6.4 layout, §6.6 motion.
+ */
+
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────── §6.2 ── */
+  --ink:         #0C0C0B;  /* warm near-black — never pure #000 */
+  --ink-raised:  #161614;  /* cards, raised blocks on dark */
+  --cream:       #FBF8F3;  /* light rooms — paper, not clay */
+  --cream-sunk:  #F2EDE4;  /* subtle blocks on cream */
+
+  /* ── Brand ────────────────────────────────────────────────────────── */
+  --gold:        #C8A551;  /* accent on dark ONLY — fails AA on cream */
+  --gold-deep:   #8C6D28;  /* accent/text on light — passes AA */
+  --emerald:     #0A5741;  /* deep — text on cream, surfaces */
+  --emerald-lit: #127A5C;  /* accent on dark */
+
+  /* ── Text ─────────────────────────────────────────────────────────── */
+  --text-on-dark:       #F3EFE8;
+  --text-on-dark-mute:  #A8A399;
+  --text-on-light:      #16150F;
+  --text-on-light-mute: #5A5750;
+
+  /* ── Lines ────────────────────────────────────────────────────────── */
+  --rule-dark:  rgba(200, 165, 81, 0.28);
+  --rule-light: rgba(22, 21, 15, 0.14);
+
+  /* ── Typography ───────────────────────────────────────────── §6.3 ── */
+  /* Placeholders until David supplies official typography. Swapping the
+     face is a one-line change here. Both are self-hosted (public/fonts). */
+  --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-body:    'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* Fluid type scale */
+  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);
+  --step-0:  clamp(1rem, 0.96rem + 0.2vw, 1.13rem);
+  --step-1:  clamp(1.25rem, 1.15rem + 0.5vw, 1.6rem);
+  --step-2:  clamp(1.56rem, 1.35rem + 1vw, 2.25rem);
+  --step-3:  clamp(1.95rem, 1.6rem + 1.8vw, 3.2rem);
+  --step-4:  clamp(2.44rem, 1.85rem + 2.9vw, 4.5rem);
+  --step-5:  clamp(3.05rem, 2.1rem + 4.7vw, 6.5rem);
+
+  /* Utility treatment — eyebrows, labels, nav, buttons (§6.3) */
+  --tracking-utility: 0.14em;
+  --measure: 65ch;
+  --leading-body: 1.7;
+
+  /* ── Layout ───────────────────────────────────────────────── §6.4 ──
+     Mobile first. These are the phone values; the min-width: 900px block
+     below is where the desktop room opens up. */
+  --gutter:    1.75rem;
+  --max-w:     1400px;
+  --section-y: clamp(4rem, 10vh, 6rem);
+  --header-h:  4.25rem;
+
+  /* The meeting axis. On phones it lives in the left margin and doubles as a
+     scroll spine (§6.4); the gutter is wider than the axis so the spine sits
+     in a clear channel rather than underneath the text. On desktop it moves
+     to the page centre (§6.1). */
+  --axis-x: 0.875rem;
+
+  /* One editorial portrait ratio for every photograph on the site. All four
+     approved originals are 3:4; 4:5 crops ~3% off the top and bottom, which
+     tightens the plate in frame without ever tending towards landscape (§5.2). */
+  --photo-portrait: 4 / 5;
+
+  /* Distance from the viewport edge to the content edge. Full-bleed sections
+     use this to line their content up with the constrained ones, which sit in
+     a centred --max-w container. */
+  --edge-x: max(var(--gutter), calc((100vw - var(--max-w)) / 2 + var(--gutter)));
+
+  /* ── Motion ───────────────────────────────────────────────── §6.6 ── */
+  --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro:  180ms;
+  --dur-link:   220ms;
+  --dur-reveal: 700ms;
+  --dur-image:  900ms;
+  --stagger:    60ms;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --gutter:    clamp(1.5rem, 5vw, 6rem);
+    --section-y: clamp(6rem, 14vh, 11rem);
+    --header-h:  5rem;
+    --axis-x:    50%;
+  }
+}
+
+/**
+ * Tailwind v4 theme bridge.
+ *
+ * `inline` makes the generated utilities reference the custom properties above
+ * rather than copying their values, so a single edit in :root still propagates
+ * everywhere. Utility classes are a convenience; the canonical names are above.
+ */
+@theme inline {
+  --color-ink:         var(--ink);
+  --color-ink-raised:  var(--ink-raised);
+  --color-cream:       var(--cream);
+  --color-cream-sunk:  var(--cream-sunk);
+  --color-gold:        var(--gold);
+  --color-gold-deep:   var(--gold-deep);
+  --color-emerald:     var(--emerald);
+  --color-emerald-lit: var(--emerald-lit);
+
+  --color-on-dark:       var(--text-on-dark);
+  --color-on-dark-mute:  var(--text-on-dark-mute);
+  --color-on-light:      var(--text-on-light);
+  --color-on-light-mute: var(--text-on-light-mute);
+
+  /* Fonts and easing keep their canonical :root names (§6.3) — mirroring them
+     here would produce a circular `var()` reference. Use them directly:
+     `font-family: var(--font-display)`. */
+
+  --text-step--1: var(--step--1);
+  --text-step-0:  var(--step-0);
+  --text-step-1:  var(--step-1);
+  --text-step-2:  var(--step-2);
+  --text-step-3:  var(--step-3);
+  --text-step-4:  var(--step-4);
+  --text-step-5:  var(--step-5);
+}
