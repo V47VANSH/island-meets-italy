@@ -27,6 +27,25 @@ export default defineConfig({
   site: 'https://islandmeetsitaly.com',
   output: 'static',
   integrations: [sitemap()],
+
+  /**
+   * <ClientRouter /> turns prefetching on, but its default strategy is 'hover',
+   * and a phone never hovers — so desktop felt instant while every tap on
+   * mobile paid a full round trip before anything moved.
+   *
+   * 'viewport' does not rescue it either: on a phone the desktop link row is
+   * display:none and the overlay is [hidden], so every nav link is invisible
+   * and an IntersectionObserver never sees one.
+   *
+   * 'load' prefetches regardless of visibility or pointer type. The whole site
+   * is six static pages of roughly 5 KB gzipped, so this is about 30 KB once,
+   * and it makes navigation instant on touch. Astro still skips prefetching on
+   * save-data and slow connections.
+   */
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'load',
+  },
   vite: {
     plugins: [tailwindcss()],
   },

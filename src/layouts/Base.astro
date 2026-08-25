@@ -170,14 +170,21 @@ const jsonLd = {
     <script>
       /**
        * Scroll reveals (§6.6): opacity and a 12px rise, fired once, with
-       * rootMargin '0px 0px -12% 0px'. Re-initialised on every page load
-       * because ClientRouter swaps the document body.
+       * rootMargin '0px 0px -12% 0px'.
+       *
+       * After a client-side navigation anything already on screen is shown at
+       * once rather than being left at opacity 0 waiting for the observer to
+       * fire. That removed a visible pause on every route change, and it is
+       * also the right behaviour: the page transition is the entrance, so
+       * content that is already in view should not fade in a second time.
        */
+      let firstLoad = true;
+
       function initReveals() {
         if (!document.documentElement.classList.contains('js-reveal')) return;
 
-        const targets = document.querySelectorAll<HTMLElement>(
-          '[data-reveal]:not(.is-revealed)',
+        const targets = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-reveal]:not(.is-revealed)'),
         );
         if (targets.length === 0) return;
 
@@ -192,7 +199,22 @@ const jsonLd = {
           { rootMargin: '0px 0px -12% 0px' },
         );
 
-        targets.forEach((target) => observer.observe(target));
+        for (const target of targets) {
+          const onScreen = target.getBoundingClientRect().top < window.innerHeight;
+
+          if (!firstLoad && onScreen) {
+            // Land at the final state with no transition at all.
+            target.style.transition = 'none';
+            target.classList.add('is-revealed');
+            void target.offsetHeight;
+            target.style.transition = '';
+            continue;
+          }
+
+          observer.observe(target);
+        }
+
+        firstLoad = false;
       }
 
       initReveals();

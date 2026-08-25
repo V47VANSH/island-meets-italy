@@ -32,6 +32,13 @@ jobs:
       - name: Install
         run: npm ci
 
+      # Generates .astro/types.d.ts, which is gitignored. Without it tsc cannot
+      # resolve astro:content / astro:assets and the typecheck fails on a clean
+      # checkout even though it passes locally, where the dev server has already
+      # written those types.
+      - name: Generate Astro types
+        run: npx astro sync
+
       - name: Typecheck
         run: npx tsc --noEmit -p tsconfig.json
 
