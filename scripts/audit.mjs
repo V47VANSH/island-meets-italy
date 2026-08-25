@@ -10,7 +10,23 @@
  */
 import { readFileSync } from 'node:fs';
 
-const src = readFileSync('resources/island-meets-italy-BUILD-CONTEXT.md', 'utf8');
+const SOURCE_OF_TRUTH = 'resources/island-meets-italy-BUILD-CONTEXT.md';
+
+let src;
+try {
+  src = readFileSync(SOURCE_OF_TRUTH, 'utf8');
+} catch {
+  console.error(
+    [
+      '',
+      `Cannot audit: ${SOURCE_OF_TRUTH} is missing.`,
+      'The approved copy is compared against that file rather than a retyped',
+      'copy, so it has to stay in the repository for this check to mean anything.',
+      '',
+    ].join('\n'),
+  );
+  process.exit(1);
+}
 
 /** Pull the approved copy straight out of the source of truth, not a retype. */
 function approved(startMarker, endMarker) {

@@ -1,0 +1,19 @@
+# Cloudflare Pages headers.
+# Lives in public/, so it is copied verbatim into dist/ at build time.
+
+# Fonts are self-hosted from /fonts and are NOT content-hashed, so they need an
+# explicit immutable cache. Filenames change only when the face itself changes.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# astro:assets output is content-hashed; safe to cache forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML is cheap and must never go stale — the client edits copy through us.
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()

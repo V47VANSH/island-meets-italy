@@ -1,0 +1,75 @@
+name: CI
+
+# Cloudflare Pages deploys straight from the Git integration, so this workflow
+# does not deploy. It is the quality gate: protect the production branch and
+# make "verify" a required check, and copy that has drifted from the approved
+# text in resources/island-meets-italy-BUILD-CONTEXT.md cannot reach the site.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Build and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Build
+        run: npm run build
+
+      # Approved copy reproduced exactly, no telephone number, no empty or
+      # "coming soon" states, descriptive alt text, valid JSON-LD, one <h1>.
+      # Serving and auditing share one step: a background process started in an
+      # earlier step is not reliably still alive in the next one.
+      - name: Audit against the approved copy
+        run: |
+          npx astro preview --port 4321 &
+          PREVIEW_PID=$!
+          trap 'kill $PREVIEW_PID 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 40); do
+            curl -sfo /dev/null http://localhost:4321/ && break
+            sleep 1
+          done
+
+          curl -sfo /dev/null http://localhost:4321/ || {
+            echo "preview never came up"; exit 1
+          }
+
+          npm run audit -- http://localhost:4321/
+
+      - name: Check the JS budget
+        run: |
+          node -e '
+            const fs = require("fs"), zlib = require("zlib");
+            const html = fs.readFileSync("dist/index.html", "utf8");
+            const refs = [...html.matchAll(/src="(\/_astro\/[^"]+\.js)"/g)].map(m => m[1]);
+            const inline = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)];
+            let total = 0;
+            for (const r of refs) total += zlib.gzipSync(fs.readFileSync("dist" + r)).length;
+            for (const i of inline) total += zlib.gzipSync(Buffer.from(i[1])).length;
+            const kb = total / 1024;
+            console.log(`Page JS: ${kb.toFixed(1)} KB gzipped (budget 40 KB)`);
+            if (kb > 40) { console.error("Over the §13 JS budget."); process.exit(1); }
+          '
