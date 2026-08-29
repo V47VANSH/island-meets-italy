@@ -1,0 +1,13 @@
+# Cloudflare Workers static assets: everything in dist/ is uploaded and served
+# publicly, but dist/ also contains the server build. Without this file wrangler
+# refuses to deploy rather than expose server-side code on the open internet:
+#
+#   ✘ [ERROR] Uploading a Pages _worker.js directory as an asset.
+#
+# Astro copies public/ into dist/ verbatim, so this lands at the root of the
+# asset directory where wrangler looks for it.
+#
+# _worker.js   the compiled server, reachable via `main` in wrangler.jsonc
+# _routes.json a Pages-only routing manifest, unused on Workers
+_worker.js
+_routes.json

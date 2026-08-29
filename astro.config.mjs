@@ -63,6 +63,19 @@ export default defineConfig({
    */
   adapter: cloudflare({ imageService: 'compile' }),
   output: 'static',
+
+  /**
+   * The Cloudflare adapter configures KV-backed sessions whenever no session
+   * driver is set, and then expects a KV namespace bound as `SESSION`. Nothing
+   * on this site uses sessions — the contact endpoint is stateless — so rather
+   * than create and bind an unused KV namespace, name a driver explicitly and
+   * the adapter leaves it alone.
+   *
+   * If a future feature genuinely needs sessions, swap this for the KV driver
+   * and add the binding in wrangler.jsonc; `memory` is per-isolate and would
+   * not survive between requests.
+   */
+  session: { driver: 'memory' },
   integrations: [sitemap(), warnIfContactUnconfigured()],
 
   /**

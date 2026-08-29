@@ -66,6 +66,12 @@ jobs:
 
           npm run audit -- http://localhost:4321/
 
+      # The deploy config is not exercised by `astro build`, so a broken
+      # wrangler.jsonc only surfaces in Cloudflare's build log. This catches it
+      # here instead — it is what caught the _worker.js asset-upload refusal.
+      - name: Validate the Cloudflare deploy config
+        run: npx --yes wrangler@4 deploy --dry-run --outdir="$RUNNER_TEMP/wrangler-dry"
+
       - name: Check the JS budget
         run: |
           node -e '
