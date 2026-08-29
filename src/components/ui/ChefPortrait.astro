@@ -1,0 +1,135 @@
+---
+/**
+ * The approved author photograph, in the two treatments the brief calls for.
+ *
+ * One straight-on studio headshot: black chef's coat, gold chain, cream
+ * curtain backdrop. There is no wide or environmental crop available, so no
+ * section is designed around one.
+ *
+ * The backdrop and the coat are already the brand palette, so the feathering
+ * does the work instead of a border:
+ *
+ *   cream — the curtain sits very close to --cream, so a soft all-round mask
+ *           dissolves the frame entirely and the portrait reads as if it were
+ *           printed onto the page. No rectangle edge anywhere.
+ *
+ *   ink   — the black coat already matches --ink, so the mask leans hard on
+ *           the bottom: the shoulders and coat fall away into the section
+ *           while the face and the gold chain hold the frame. Cropped tighter
+ *           than the cream treatment so less of the light curtain survives on
+ *           a dark ground.
+ *
+ * Two treatments plus two different crops, so the same photograph is never
+ * repeated identically (§5.2).
+ *
+ * Masks are CSS rather than baked into the file: one asset, resolution
+ * independent, and if the brand colours change the blend follows them.
+ */
+import { Image } from 'astro:assets';
+import portrait from '@/assets/chef/kenton-lowrie.jpg';
+import { site } from '@/config/site';
+
+interface Props {
+  treatment: 'cream' | 'ink';
+  /** Passed straight to astro:assets. */
+  sizes?: string;
+  loading?: 'eager' | 'lazy';
+  class?: string;
+}
+
+const {
+  treatment,
+  sizes = '(min-width: 900px) 34vw, 78vw',
+  loading = 'lazy',
+  class: className = '',
+} = Astro.props;
+
+/**
+ * Descriptive alt, written to the same standard as the food photography (§11):
+ * who, what they are wearing, and what the frame actually shows.
+ */
+const alt = `${site.chef.name}, photographed straight on against a soft cream curtain: a bearded chef in a black chef's coat with a fine gold chain at the collar, looking directly at the camera.`;
+---
+
+<figure class:list={['portrait', `portrait--${treatment}`, className]}>
+  <Image
+    src={portrait}
+    alt={alt}
+    widths={[400, 560, 700, 1100]}
+    sizes={sizes}
+    loading={loading}
+    class="portrait__img"
+  />
+</figure>
+
+<style>
+  .portrait {
+    margin: 0;
+    /* Nothing to clip against — the mask is the edge. */
+    overflow: visible;
+  }
+
+  .portrait__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── Cream room: dissolve the whole frame ──────────────────────────── */
+
+  .portrait--cream .portrait__img {
+    /* Native 3:4 — nothing cropped, so there is headroom above the hair for
+       the mask to fade through rather than cutting the head off. */
+    aspect-ratio: 3 / 4;
+    object-position: 50% 30%;
+    -webkit-mask-image: radial-gradient(
+      ellipse 76% 70% at 50% 42%,
+      #000 46%,
+      rgba(0, 0, 0, 0.75) 68%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      ellipse 76% 70% at 50% 42%,
+      #000 46%,
+      rgba(0, 0, 0, 0.75) 68%,
+      transparent 100%
+    );
+  }
+
+  /* ── Ink room: let the shoulders go ────────────────────────────────── */
+
+  .portrait--ink .portrait__img {
+    /* Tighter than the cream crop, so less curtain lands on a dark ground. */
+    aspect-ratio: 1 / 1;
+    /* Low enough to keep the gold chain in frame — with the coat dissolving,
+       the chain is the only thing holding the bottom of the picture. */
+    object-position: 50% 32%;
+    /* Four soft edges rather than a radial: a strong radial reads as an oval
+       medallion, which would be a second signature shape competing with the
+       meeting line (§6.7). Fading each edge instead keeps it a photograph
+       whose edges melt, with the heaviest fade at the bottom so the coat and
+       shoulders go and the face and chain stay. */
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 14%),
+      linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.25) 18%, #000 46%),
+      linear-gradient(to right, transparent 0%, #000 16%),
+      linear-gradient(to left, transparent 0%, #000 16%);
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 14%),
+      linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.25) 18%, #000 46%),
+      linear-gradient(to right, transparent 0%, #000 16%),
+      linear-gradient(to left, transparent 0%, #000 16%);
+    -webkit-mask-composite: source-in, source-in, source-in;
+    mask-composite: intersect, intersect, intersect;
+  }
+
+  @media (prefers-contrast: more) {
+    /* Feathering is decoration; when the viewer asks for contrast, show the
+       photograph plainly rather than fading its edges into the background. */
+    .portrait__img {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+</style>

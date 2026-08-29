@@ -43,6 +43,25 @@ const { cap = 'none' } = Astro.props;
     z-index: 1;
   }
 
+  /* Step 1 of the hero sequence: the rule draws downward (§6.6). Only the
+     hero's own segment animates; the rest of the page's line is already
+     there. Gated on js-reveal, so reduced motion never sees it. */
+  :global(html.js-reveal) :global(.hero) .meeting-line {
+    transform: scaleY(0);
+    transform-origin: top center;
+  }
+  :global(html.js-reveal.hero-lit) :global(.hero) .meeting-line {
+    transform: scaleY(1);
+    transition: transform 900ms var(--ease-signature);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js-reveal) :global(.hero) .meeting-line {
+      transform: none;
+      transition: none;
+    }
+  }
+
   .meeting-line--cap-top {
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%);
     mask-image: linear-gradient(to bottom, transparent, #000 7%);

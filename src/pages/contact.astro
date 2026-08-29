@@ -2,14 +2,13 @@
 /**
  * Contact (§7.6).
  *
- * Phase 2 adds the form itself — Name, Email, Inquiry Type, Message — with the
- * Pages Function, Resend and Turnstile behind it, and the `?type=` preselect.
- *
- * The official public email and social links render from config the moment they
- * exist and render nothing until then (§10). No telephone number, ever (§4.7).
+ * The official public email and the social links render from config the moment
+ * they exist and render nothing until then (§10). No telephone number, ever —
+ * explicit client prohibition (§4.7).
  */
 import Base from '@/layouts/Base.astro';
-import PageIntro from '@/components/layout/PageIntro.astro';
+import Section from '@/components/layout/Section.astro';
+import ContactForm from '@/components/contact/ContactForm.astro';
 import { site, socialLinks } from '@/config/site';
 
 const title = 'Contact — Island Meets Italy';
@@ -20,54 +19,118 @@ const description =
 <Base
   title={title}
   description={description}
+  ogImage="/og/contact.jpg"
   breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Contact', href: '/contact' }]}
 >
-  <PageIntro title="Get in Touch">
-    <p class="prose">
-      For general inquiries, media opportunities, partnerships, speaking
-      engagements and Island Meets Italy business inquiries.
-    </p>
+  <Section tone="ink" labelledby="contact-title" lineCap="top" class="contact">
+    <div class="contact__grid">
+      <div class="contact__intro">
+        <div data-reveal>
+          <h1 class="contact__title display" id="contact-title">Get in Touch</h1>
+          <p class="contact__standfirst prose">
+            For general inquiries, media opportunities, partnerships, speaking
+            engagements and Island Meets Italy business inquiries.
+          </p>
+        </div>
 
-    {
-      site.contact.email && (
-        <p class="contact__email">
-          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
-        </p>
-      )
-    }
+        {
+          (site.contact.email || socialLinks.length > 0) && (
+            <div class="contact__direct" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+              {site.contact.email && (
+                <a class="contact__email" href={`mailto:${site.contact.email}`}>
+                  {site.contact.email}
+                </a>
+              )}
 
-    {
-      socialLinks.length > 0 && (
-        <ul class="contact__social">
-          {socialLinks.map((social) => (
-            <li>
-              <a href={social.href} rel="noopener noreferrer me">{social.label}</a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
-  </PageIntro>
+              {socialLinks.length > 0 && (
+                <ul class="contact__social">
+                  {socialLinks.map((social) => (
+                    <li>
+                      <a href={social.href} rel="noopener noreferrer me">{social.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )
+        }
+      </div>
+
+      <div class="contact__formwrap" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        <ContactForm />
+      </div>
+    </div>
+  </Section>
 </Base>
 
 <style>
-  .contact__email a,
-  .contact__social a {
+  .contact__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vh, 4rem) 0;
+    padding-block-start: var(--header-h);
+  }
+
+  .contact__title {
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  .contact__standfirst {
+    margin-block-start: 1.25rem;
+    color: var(--room-mute);
+  }
+
+  .contact__direct { margin-block-start: clamp(2rem, 4vh, 2.75rem); }
+
+  .contact__email {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: var(--step-0);
     color: var(--room-accent);
     text-decoration: none;
     border-block-end: 1px solid transparent;
     transition: border-color var(--dur-link) var(--ease-signature);
   }
-  .contact__email a:hover,
-  .contact__social a:hover { border-block-end-color: currentColor; }
+  .contact__email:hover { border-block-end-color: currentColor; }
 
   .contact__social {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 1.75rem;
+    margin-block-start: 1.25rem;
     font-family: var(--font-body);
     font-size: var(--step--1);
     text-transform: uppercase;
     letter-spacing: var(--tracking-utility);
+  }
+  .contact__social a {
+    color: var(--room-mute);
+    text-decoration: none;
+  }
+  .contact__social a:hover { color: var(--room-text); }
+
+  @media (min-width: 900px) {
+    .contact__grid {
+      /* Intro left of the meeting line, the form right of it. */
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .contact__intro {
+      grid-column: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+      max-width: 26rem;
+    }
+    .contact__intro :global(.prose) { margin-inline-start: auto; }
+
+    .contact__formwrap {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+      max-width: 34rem;
+    }
   }
 </style>

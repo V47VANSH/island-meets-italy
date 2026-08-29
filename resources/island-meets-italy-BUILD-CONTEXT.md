@@ -579,13 +579,20 @@ Driven from a content collection so adding a fifth dish is a data change, not a 
 | Motion | CSS + IntersectionObserver | No GSAP. Not worth the weight here |
 | Transitions | Astro `<ClientRouter />` | `transition:persist` on header |
 | Fonts | Self-hosted `.woff2`, variable | `font-display: swap`, preload the display face |
-| Host | **Cloudflare Pages** | Free tier permits commercial use, unlimited bandwidth |
-| Forms | Cloudflare Pages Function → **Resend** | Turnstile for spam |
+| Host | **Cloudflare Workers** (static assets) | Free tier permits commercial use. Deploy target is committed in `wrangler.jsonc`, not left in the dashboard |
+| Forms | Astro endpoint (`prerender = false`) on Workers → **Resend** REST API via `fetch`, no SDK | Turnstile for spam |
 | DNS | Cloudflare | `.ca` → `.com` via Redirect Rule |
 | Analytics | Cloudflare Web Analytics | Cookieless — no consent banner needed |
 | Sitemap | `@astrojs/sitemap` | |
 
-**Not Vercel.** Vercel's Hobby tier prohibits commercial use; this is a commercial site and would require Pro. Cloudflare Pages' free tier permits it.
+**Workers, not Pages.** The project deploys to Cloudflare Workers with static
+assets. The six content pages are prerendered and served as assets; only
+`/api/contact` runs on demand, via `export const prerender = false`. A Pages
+Function would be inert here, so the contact endpoint is an Astro endpoint
+under `@astrojs/cloudflare` (pinned to the 12.x line — 13+ requires Astro 6,
+14+ requires Astro 7, and this project is fixed on Astro 5).
+
+**Not Vercel.** Vercel's Hobby tier prohibits commercial use; this is a commercial site and would require Pro. Cloudflare's free tier permits it.
 
 **Ongoing cost to client: $0/month** beyond existing GoDaddy domain renewals.
 
@@ -595,6 +602,7 @@ Driven from a content collection so adding a fifth dish is a data change, not a 
 astro                    ^5
 @astrojs/react
 @astrojs/sitemap
+@astrojs/cloudflare      ~12.6    (adapter; Astro 5 line)
 @tailwindcss/vite
 tailwindcss              ^4
 sharp
@@ -640,6 +648,8 @@ island-meets-italy/
 │   ├── layouts/
 │   │   └── Base.astro           ← head, meta, schema, ClientRouter
 │   ├── pages/
+│   │   ├── api/
+│   │   │   └── contact.ts       ← the only non-prerendered route
 │   │   ├── index.astro
 │   │   ├── about.astro
 │   │   ├── cookbook.astro
@@ -657,9 +667,7 @@ island-meets-italy/
 │   ├── media-kit.pdf            ← placeholder until final
 │   ├── robots.txt
 │   └── favicon/
-├── functions/
-│   └── api/
-│       └── contact.ts           ← Cloudflare Pages Function
+├── wrangler.jsonc               ← deploy target, committed not dashboard-only
 └── astro.config.mjs
 ```
 
@@ -935,6 +943,10 @@ Nameserver change is offered three ways, in order of preference: (1) Kenton does
 - [ ] Keyboard-navigable end to end, visible focus throughout
 - [ ] `prefers-reduced-motion` fully respected
 - [ ] No telephone number anywhere on the site
+- [ ] Contact form tested end-to-end with a real send — a submission arrives in
+      the client's inbox. Until `contact.formRecipient` and `RESEND_API_KEY`
+      both exist the endpoint returns 503 by design, so this cannot be ticked
+      by seeing the success state in development
 - [ ] Structured data validates
 - [ ] `.ca` redirects to `.com`
 - [ ] Kenton owns the Cloudflare account, the repo, and both domains

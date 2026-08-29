@@ -1,0 +1,34 @@
+{
+  // Deploy target, in the repository rather than only in the Cloudflare
+  // dashboard. This project runs on Cloudflare Workers with static assets:
+  // the six content pages are prerendered into dist/ and served as assets,
+  // and only /api/contact runs on demand (see src/pages/api/contact.ts).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "island-meets-italy",
+  "main": "dist/_worker.js/index.js",
+  "compatibility_date": "2026-08-01",
+
+  // Required by the Astro Cloudflare adapter for Node built-ins used during
+  // rendering. Without it the Worker fails to boot.
+  "compatibility_flags": ["nodejs_compat"],
+
+  "assets": {
+    "directory": "./dist",
+    // Astro emits this; it tells the runtime which paths are static assets
+    // and which must fall through to the Worker.
+    "binding": "ASSETS"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+
+  // Secrets are NOT set here — they would be committed. Set them with:
+  //   npx wrangler secret put RESEND_API_KEY
+  //   npx wrangler secret put TURNSTILE_SECRET_KEY
+  // or in the Cloudflare dashboard under Workers → Settings → Variables.
+  //
+  // Until RESEND_API_KEY and a recipient both exist, the contact endpoint
+  // returns 503 in production rather than accepting an inquiry it cannot
+  // deliver. The build prints a warning while either is missing.
+}

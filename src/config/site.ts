@@ -24,6 +24,8 @@ export const site = {
   chef: {
     name: 'Chef Kenton Lowrie',
     title: 'Professional Chef • Author • Founder',
+    /** Approved author photograph, delivered 29 Aug 2026. */
+    photo: 'kenton-lowrie.jpg',
   },
 
   book: {
@@ -37,6 +39,12 @@ export const site = {
     price: 'CAD $29.99',
     priceValue: 29.99,
     currency: 'CAD',
+    /**
+     * PENDING. Drop the artwork at src/assets/book/cover.jpg (or .png/.webp)
+     * and set this to true. Until then the cookbook renders a typographic
+     * cover block at the same aspect ratio, so the swap costs no layout.
+     */
+    coverImage: null as string | null,
     isbn: null as string | null,              // PENDING
     publicationDate: null as string | null,   // PENDING
     purchaseUrl: null as string | null,       // PENDING — falls back to /cookbook
@@ -45,6 +53,14 @@ export const site = {
   contact: {
     email: null as string | null,             // PENDING
     // phone: NEVER. Client prohibition.
+
+    /**
+     * Where the contact form delivers. PENDING — the single value to change
+     * when the official address arrives. While it is null the endpoint accepts
+     * and logs the submission rather than sending, so the form is never broken
+     * and no address is ever hardcoded.
+     */
+    formRecipient: null as string | null,
   },
 
   social: {
@@ -64,7 +80,12 @@ export const site = {
      * a button that 404s is exactly the broken link §10 forbids. Drop the file
      * at `public/media-kit.pdf` and flip this to true; nothing else changes.
      */
-    available: false,
+    /**
+     * A placeholder PDF ships at public/media-kit.pdf so the download works
+     * today. `isFinal` flips when the real Author & Book Media Kit lands; the
+     * button looks and behaves identically either way.
+     */
+    available: true,
   },
 
   nav: [
@@ -75,6 +96,16 @@ export const site = {
     { label: 'MEDIA',    href: '/media' },
     { label: 'CONTACT',  href: '/contact' },
   ],
+
+  /**
+   * Cloudflare Turnstile (§7.6). PENDING — the widget renders only once a site
+   * key exists, and the endpoint only verifies once a secret is configured, so
+   * the form works today and gains spam protection the moment keys are added.
+   * The secret belongs in the deployment environment, never in this file.
+   */
+  turnstile: {
+    siteKey: null as string | null,
+  },
 
   inquiryTypes: [
     'General Inquiry',

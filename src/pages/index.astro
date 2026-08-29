@@ -2,15 +2,17 @@
 /**
  * Home (§7.1).
  *
- * Phase 2, first half: hero through the cookbook feature. The chef
- * introduction and media feature follow in the next pass, keeping the
- * ink / cream / ink alternation of §6.4 going.
+ * Room sequence per §6.4: ink hero, ink brand introduction, cream food
+ * feature, ink cookbook feature, cream chef introduction, ink media feature,
+ * ink footer. Plate colour decides which room each photograph lands in.
  */
 import Base from '@/layouts/Base.astro';
 import Hero from '@/components/home/Hero.astro';
 import BrandIntro from '@/components/home/BrandIntro.astro';
 import FoodFeature from '@/components/home/FoodFeature.astro';
 import CookbookFeature from '@/components/home/CookbookFeature.astro';
+import ChefIntro from '@/components/home/ChefIntro.astro';
+import MediaFeature from '@/components/home/MediaFeature.astro';
 import { site } from '@/config/site';
 
 const title = 'Island Meets Italy — Chef Kenton Lowrie';
@@ -38,9 +40,17 @@ const bookSchema = {
 };
 ---
 
-<Base title={title} description={description} schema={[bookSchema]} headerOverlay>
+<Base
+  title={title}
+  description={description}
+  ogImage="/og/home.jpg"
+  schema={[bookSchema]}
+  headerOverlay
+>
   <Hero />
   <BrandIntro />
   <FoodFeature />
   <CookbookFeature />
+  <ChefIntro />
+  <MediaFeature />
 </Base>

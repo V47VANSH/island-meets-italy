@@ -16,9 +16,9 @@ export interface Props {
   title: string;
   description: string;
   /**
-   * Path to the social preview image, relative to the site root. Omitted for
-   * now: per-page OG images are Phase 4 work (§15), and a tag pointing at a
-   * file that does not exist is exactly the broken reference §10 forbids.
+   * Social preview image, relative to the site root. Every page has one;
+   * generate the set with `npm run og` after changing tokens, fonts or the
+   * source photographs.
    */
   ogImage?: string;
   /** Extra JSON-LD nodes for this page, already pruned of nulls. */
@@ -37,7 +37,7 @@ export interface Props {
 const {
   title,
   description,
-  ogImage,
+  ogImage = '/og/default.jpg',
   schema = [],
   breadcrumbs,
   bodyClass = '',

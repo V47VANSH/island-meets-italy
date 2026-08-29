@@ -1,0 +1,446 @@
+---
+/**
+ * Contact form (§7.6).
+ *
+ * DEVIATION, flagged. §8 lists this as a React island. It is plain markup plus
+ * a small script instead, for the same reason the mobile nav is: react +
+ * react-dom is 57 KB gzipped and would break §13's 40 KB budget on the one
+ * page where a slow form is least welcome. This version costs about 2 KB, and
+ * because it is a real <form> it still submits and still validates natively
+ * if the script never runs — which a React island cannot do.
+ *
+ * Accessibility (§11): real <label> elements, never placeholder-as-label;
+ * errors linked with aria-describedby and marked with aria-invalid; the error
+ * summary takes focus on a failed submit; success replaces the form in place
+ * and is announced, with no navigation.
+ *
+ * Error copy states what happened and how to fix it, in the interface's voice.
+ */
+import { site } from '@/config/site';
+
+const fieldIds = {
+  name: 'contact-name',
+  email: 'contact-email',
+  type: 'contact-type',
+  message: 'contact-message',
+};
+---
+
+<div class="form" data-contact>
+  <form
+    class="form__form"
+    action="/api/contact"
+    method="POST"
+    novalidate
+    data-contact-form
+  >
+    <div class="form__row">
+      <label class="form__label" for={fieldIds.name}>Name</label>
+      <input
+        class="form__input"
+        id={fieldIds.name}
+        name="name"
+        type="text"
+        autocomplete="name"
+        required
+        aria-describedby={`${fieldIds.name}-error`}
+      />
+      <p class="form__error" id={`${fieldIds.name}-error`} data-error-for="name"></p>
+    </div>
+
+    <div class="form__row">
+      <label class="form__label" for={fieldIds.email}>Email</label>
+      <input
+        class="form__input"
+        id={fieldIds.email}
+        name="email"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        aria-describedby={`${fieldIds.email}-error`}
+      />
+      <p class="form__error" id={`${fieldIds.email}-error`} data-error-for="email"></p>
+    </div>
+
+    <div class="form__row">
+      <label class="form__label" for={fieldIds.type}>Inquiry Type</label>
+      <div class="form__selectwrap">
+        <select
+          class="form__input form__select"
+          id={fieldIds.type}
+          name="inquiryType"
+          aria-describedby={`${fieldIds.type}-error`}
+        >
+          {site.inquiryTypes.map((option) => <option value={option}>{option}</option>)}
+        </select>
+        <span class="form__chevron" aria-hidden="true"></span>
+      </div>
+      <p class="form__error" id={`${fieldIds.type}-error`} data-error-for="inquiryType"></p>
+    </div>
+
+    <div class="form__row">
+      <label class="form__label" for={fieldIds.message}>Message</label>
+      <textarea
+        class="form__input form__textarea"
+        id={fieldIds.message}
+        name="message"
+        rows="7"
+        required
+        aria-describedby={`${fieldIds.message}-error`}></textarea>
+      <p class="form__error" id={`${fieldIds.message}-error`} data-error-for="message"></p>
+    </div>
+
+    {/* Honeypot: a real field name a bot will fill and a person never sees.
+        Hidden from assistive tech too, so it is never announced or focused. */}
+    <div class="form__trap" aria-hidden="true">
+      <label for="contact-company">Company</label>
+      <input id="contact-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    {
+      site.turnstile.siteKey && (
+        <div
+          class="cf-turnstile form__turnstile"
+          data-sitekey={site.turnstile.siteKey}
+          data-theme="dark"
+        />
+      )
+    }
+
+    <p
+      class="form__summary"
+      data-form-summary
+      data-fallback-email={site.contact.email ?? undefined}
+      role="alert"
+      hidden
+    ></p>
+
+    <button class="form__submit" type="submit" data-form-submit>
+      <span class="form__submitlabel" data-submit-label>Send Message</span>
+    </button>
+  </form>
+
+  {/* Replaces the form in place on success — no navigation (§7.6). */}
+  <div class="form__done" data-form-success role="status" hidden>
+    <p class="form__donetitle display">Thank you — your message is on its way.</p>
+    <p class="form__donebody prose">
+      Kenton reads every inquiry personally and will reply to the address you
+      gave as soon as he can.
+    </p>
+  </div>
+</div>
+
+{site.turnstile.siteKey && (
+  <script
+    is:inline
+    async
+    defer
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  />
+)}
+
+<style>
+  .form__row { margin-block-end: clamp(1.25rem, 3vh, 1.75rem); }
+
+  .form__label {
+    display: block;
+    margin-block-end: 0.5rem;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    color: var(--room-accent);
+  }
+
+  .form__input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--room-rule);
+    border-radius: 0;
+    background: var(--ink-raised);
+    color: var(--room-text);
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    line-height: 1.4;
+    transition: border-color var(--dur-link) var(--ease-signature);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .form__input:hover { border-color: var(--room-line); }
+  .form__input:focus-visible { border-color: var(--room-accent); }
+
+  .form__input[aria-invalid='true'] { border-color: #E4736B; }
+
+  .form__textarea {
+    resize: vertical;
+    min-height: 9rem;
+  }
+
+  .form__selectwrap { position: relative; }
+  .form__select { padding-inline-end: 2.75rem; cursor: pointer; }
+  .form__chevron {
+    position: absolute;
+    inset-inline-end: 1rem;
+    inset-block-start: 50%;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-inline-end: 1px solid var(--room-mute);
+    border-block-end: 1px solid var(--room-mute);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .form__error {
+    margin-block-start: 0.5rem;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    line-height: 1.45;
+    color: #E4736B;
+  }
+  .form__error:empty { display: none; }
+
+  /* Off-screen rather than display:none — a bot reading the DOM still sees a
+     normal field, which is the point. */
+  .form__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form__turnstile { margin-block-end: clamp(1.25rem, 3vh, 1.75rem); }
+
+  .form__summary {
+    margin-block-end: 1.25rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #E4736B;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    line-height: 1.5;
+    color: #E4736B;
+  }
+  .form__summary[hidden] { display: none; }
+
+  /* Styled here rather than reusing Button.astro's classes: those are scoped
+     to that component, so `class="btn btn--filled"` on this element matched
+     nothing and the button rendered as bare text. */
+  .form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.9rem 1.75rem;
+    border: 1px solid var(--room-accent);
+    background: var(--room-accent);
+    color: var(--room-bg);
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-micro) var(--ease-signature),
+      color var(--dur-micro) var(--ease-signature);
+  }
+  .form__submit:hover:not([disabled]) {
+    background: transparent;
+    color: var(--room-accent);
+  }
+  .form__submit[disabled] { opacity: 0.6; cursor: progress; }
+
+  .form__submitlabel {
+    /* Optical centring: uppercase plus tracking pushes the text right. */
+    margin-inline-end: calc(var(--tracking-utility) * -1);
+  }
+
+  .form__done[hidden] { display: none; }
+
+  .form__donetitle {
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--room-accent);
+    text-wrap: balance;
+  }
+
+  .form__donebody {
+    margin-block-start: 1rem;
+    color: var(--room-mute);
+  }
+
+  @media (min-width: 700px) {
+    .form__submit { width: auto; min-width: 14rem; }
+  }
+</style>
+
+<script>
+  /**
+   * Validation, submission and the success state. Everything here is an
+   * enhancement: without it the form still posts to /api/contact and the
+   * browser still enforces `required` and `type="email"`.
+   */
+  const MESSAGES: Record<string, { empty: string; invalid?: string }> = {
+    name: { empty: 'Add your name so Kenton knows who is writing.' },
+    email: {
+      empty: 'Enter an email address so Kenton can reply.',
+      invalid: 'That address is missing something — check for a typo, like a stray space or a missing “@”.',
+    },
+    message: { empty: 'Tell Kenton what you would like to discuss.' },
+  };
+
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function initContactForm() {
+    const root = document.querySelector<HTMLElement>('[data-contact]');
+    if (!root || root.dataset.bound === 'true') return;
+    root.dataset.bound = 'true';
+
+    const form = root.querySelector<HTMLFormElement>('[data-contact-form]');
+    const success = root.querySelector<HTMLElement>('[data-form-success]');
+    const summary = root.querySelector<HTMLElement>('[data-form-summary]');
+    const submit = root.querySelector<HTMLButtonElement>('[data-form-submit]');
+    const label = root.querySelector<HTMLElement>('[data-submit-label]');
+    if (!form || !success || !summary || !submit || !label) return;
+
+    // Preselect the inquiry type from ?type= (§7.6). Matched loosely so
+    // /contact?type=media lands on "Media & Press".
+    const wanted = new URLSearchParams(window.location.search).get('type');
+    const select = form.elements.namedItem('inquiryType') as HTMLSelectElement | null;
+    if (wanted && select) {
+      const slug = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '');
+      const match = Array.from(select.options).find(
+        (o) => slug(o.value).includes(slug(wanted)) || slug(wanted).includes(slug(o.value)),
+      );
+      if (match) select.value = match.value;
+    }
+
+    const fieldOf = (name: string) =>
+      form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+    const errorOf = (name: string) =>
+      form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+
+    function setError(name: string, message: string | null) {
+      const field = fieldOf(name);
+      const slot = errorOf(name);
+      if (!field || !slot) return;
+      slot.textContent = message ?? '';
+      if (message) field.setAttribute('aria-invalid', 'true');
+      else field.removeAttribute('aria-invalid');
+    }
+
+    function validate(name: string): boolean {
+      const field = fieldOf(name);
+      const rules = MESSAGES[name];
+      if (!field || !rules) return true;
+
+      const value = field.value.trim();
+      if (!value) {
+        setError(name, rules.empty);
+        return false;
+      }
+      if (name === 'email' && !EMAIL.test(value)) {
+        setError(name, rules.invalid ?? rules.empty);
+        return false;
+      }
+      setError(name, null);
+      return true;
+    }
+
+    // Validate on blur, then live once a field has already been marked wrong,
+    // so a person is corrected as they fix it and not while they type.
+    for (const name of Object.keys(MESSAGES)) {
+      const field = fieldOf(name);
+      if (!field) continue;
+      field.addEventListener('blur', () => validate(name));
+      field.addEventListener('input', () => {
+        if (field.getAttribute('aria-invalid') === 'true') validate(name);
+      });
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      summary.hidden = true;
+
+      const names = Object.keys(MESSAGES);
+      const bad = names.filter((n) => !validate(n));
+
+      if (bad.length > 0) {
+        summary.textContent =
+          bad.length === 1
+            ? 'One field needs attention before this can be sent.'
+            : `${bad.length} fields need attention before this can be sent.`;
+        summary.hidden = false;
+        fieldOf(bad[0]!)?.focus();
+        return;
+      }
+
+      submit.disabled = true;
+      const previous = label.textContent;
+      label.textContent = 'Sending…';
+
+      const fail = (text: string) => {
+        summary.textContent = text;
+        summary.hidden = false;
+        summary.focus?.();
+        submit.disabled = false;
+        label.textContent = previous;
+      };
+
+      // The email to fall back to, if the client has supplied one yet.
+      const fallback = summary.dataset.fallbackEmail;
+      const orWriteTo = fallback
+        ? ` In the meantime you can write to ${fallback} directly.`
+        : '';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form),
+        });
+
+        const result = (await response.json().catch(() => null)) as
+          | { ok?: boolean; error?: string }
+          | null;
+
+        if (response.ok && result?.ok) {
+          form.hidden = true;
+          success.hidden = false;
+          success.focus?.();
+          return;
+        }
+
+        // The endpoint refuses to claim success for a message it cannot
+        // deliver, so say exactly that rather than blaming the connection.
+        if (response.status === 503 || result?.error === 'not-configured') {
+          fail(
+            'This form is not able to send messages yet, so nothing was submitted.' +
+              orWriteTo,
+          );
+          return;
+        }
+
+        if (response.status === 403 || result?.error === 'challenge') {
+          fail('The spam check did not pass. Reload the page and try once more.');
+          return;
+        }
+
+        fail('That did not send — something went wrong at our end.' + orWriteTo);
+      } catch {
+        fail(
+          'That did not send — the connection may have dropped. Try again in a moment.' +
+            orWriteTo,
+        );
+      }
+    });
+  }
+
+  initContactForm();
+  document.addEventListener('astro:page-load', initContactForm);
+</script>

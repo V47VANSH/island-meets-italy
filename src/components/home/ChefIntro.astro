@@ -1,0 +1,128 @@
+---
+/**
+ * Chef introduction (§7.1) — a cream room, so the curtain backdrop of the
+ * author photograph blends into the section rather than sitting in a box.
+ *
+ * The philosophy line is pulled out of the approved paragraph and set larger
+ * in the display face in --emerald, as §7.1 asks. It is the same approved
+ * sentence, not a rewrite — it is simply given its own weight.
+ */
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import ChefPortrait from '@/components/ui/ChefPortrait.astro';
+import { site } from '@/config/site';
+---
+
+<Section tone="cream" labelledby="chef-intro-title" class="chef">
+  <div class="chef__grid">
+    <ChefPortrait
+      treatment="cream"
+      sizes="(min-width: 900px) 32vw, 74vw"
+      class="chef__portrait"
+    />
+
+    <div class="chef__copy">
+      <div data-reveal>
+        <h2 class="chef__title display" id="chef-intro-title">
+          Meet Chef Kenton Lowrie
+        </h2>
+        <p class="chef__role utility">{site.chef.title}</p>
+      </div>
+
+      <p class="chef__body prose" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        With more than 20 years of professional kitchen experience and a
+        background in Culinary Management at Humber College, Chef Kenton Lowrie
+        created Island Meets Italy as an expression of his culinary experience,
+        Jamaican heritage and passion for Italian cuisine.
+      </p>
+
+      <p
+        class="chef__philosophy display"
+        data-reveal
+        style="--reveal-delay: calc(var(--stagger) * 2)"
+      >
+        Great food begins with strong foundations, quality ingredients and
+        genuine passion.
+      </p>
+
+      <div class="chef__actions" data-reveal style="--reveal-delay: calc(var(--stagger) * 3)">
+        <Button href="/about" variant="outlined">Meet Chef Kenton</Button>
+      </div>
+    </div>
+  </div>
+</Section>
+
+<style>
+  /* ── Mobile (base) ──────────────────────────────────────────────────── */
+
+  .chef__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vh, 2.5rem);
+  }
+
+  .chef__portrait {
+    /* Slightly inset, so the feathered edge has cream to dissolve into
+       instead of running off the side of the screen. */
+    width: min(74%, 20rem);
+    margin-inline: auto;
+  }
+
+  .chef__title {
+    font-size: var(--step-3);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .chef__role {
+    margin-block-start: 1rem;
+    color: var(--room-accent);
+  }
+
+  .chef__body {
+    margin-block-start: clamp(1.5rem, 3vh, 2rem);
+    color: var(--room-mute);
+  }
+
+  /* The philosophy line, given its own weight (§7.1). */
+  .chef__philosophy {
+    margin-block-start: clamp(2rem, 4vh, 2.75rem);
+    padding-block-start: clamp(1.5rem, 3vh, 2rem);
+    border-block-start: 1px solid var(--room-rule);
+    font-size: var(--step-2);
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+    color: var(--emerald);
+    max-width: 26ch;
+    text-wrap: balance;
+  }
+
+  .chef__actions { margin-block-start: clamp(2rem, 4vh, 2.75rem); }
+
+  /* ── Desktop: portrait left of the meeting line, copy right ─────────── */
+
+  @media (min-width: 900px) {
+    .chef__grid {
+      /* The column boundary is the meeting line; the portrait sits left of it
+         and the copy right, so this room enters from the opposite side to the
+         cookbook feature above it (§6.1). */
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 0;
+    }
+
+    .chef__portrait {
+      grid-column: 1;
+      justify-self: end;
+      width: min(100%, 26rem);
+      margin-inline: 0;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .chef__copy {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+  }
+</style>

@@ -1,5 +1,7 @@
 // @ts-check
+import { site as siteConfig } from './src/config/site.ts';
 import { defineConfig } from 'astro/config';
+import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -22,11 +24,46 @@ import tailwindcss from '@tailwindcss/vite';
  * `/src/**\/*.astro?astro&type=script`. If it 500s, this is why.
  */
 
+/**
+ * Fail loudly at build time rather than at 3am when an inquiry vanishes.
+ * The contact endpoint refuses to report success in production unless both a
+ * recipient and an API key exist, so surface that while the build is running.
+ */
+function warnIfContactUnconfigured() {
+  return {
+    name: 'imi:contact-config-warning',
+    hooks: {
+      'astro:build:done': ({ logger }) => {
+        const missing = [];
+        if (!siteConfig.contact.formRecipient) missing.push('contact.formRecipient in src/config/site.ts');
+        if (!process.env.RESEND_API_KEY) missing.push('RESEND_API_KEY in the deploy environment');
+        if (missing.length === 0) return;
+        logger.warn(
+          'Contact form cannot deliver yet — missing ' +
+            missing.join(' and ') +
+            '. The endpoint will return 503 in production rather than ' +
+            'silently accepting an inquiry. See §17.',
+        );
+      },
+    },
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://islandmeetsitaly.com',
+
+  /**
+   * Deploys to Cloudflare Workers, not Pages. The six content pages are still
+   * prerendered; only src/pages/api/contact.ts opts out with
+   * `export const prerender = false` and runs on demand.
+   *
+   * Pinned to the 12.x line: 13+ requires Astro 6 and 14+ requires Astro 7,
+   * and §8 of the build context fixes this project on Astro 5.
+   */
+  adapter: cloudflare({ imageService: 'compile' }),
   output: 'static',
-  integrations: [sitemap()],
+  integrations: [sitemap(), warnIfContactUnconfigured()],
 
   /**
    * <ClientRouter /> turns prefetching on, but its default strategy is 'hover',

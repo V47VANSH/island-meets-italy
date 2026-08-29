@@ -2,18 +2,33 @@
 /**
  * Media (§7.5).
  *
- * Phase 2 adds the author photograph and the press section — the latter built
- * as a component that renders nothing while the collection is empty, never an
- * empty-state message on a public page (§7.5).
+ * The topics sentence is set as a typographic list rather than prose, which
+ * §7.5 explicitly allows — the copy itself is unchanged, only its arrangement.
  *
- * The media kit download only appears once a PDF actually exists; see
- * `mediaKit.available` in site.ts. A download button pointing at a missing file
- * is the broken link §10 rules out.
+ * The press section renders nothing while the collection is empty; there is no
+ * empty-state message anywhere on this page (§7.5, §10).
  */
 import Base from '@/layouts/Base.astro';
-import PageIntro from '@/components/layout/PageIntro.astro';
+import Section from '@/components/layout/Section.astro';
 import Button from '@/components/ui/Button.astro';
+import ChefPortrait from '@/components/ui/ChefPortrait.astro';
+import PressList from '@/components/media/PressList.astro';
 import { site } from '@/config/site';
+
+/**
+ * The approved topics sentence, broken at its own commas so it can be set as
+ * a list. Reassembled verbatim — no word is added, removed or reordered.
+ */
+const topics = [
+  'the inspiration behind Island Meets Italy',
+  'Jamaican-Italian culinary fusion',
+  'building flavour through strong foundations',
+  'recipe development',
+  'professional kitchen leadership',
+  'cookbook publishing',
+  'entrepreneurship',
+  'the future of the Island Meets Italy brand',
+];
 
 const title = 'Media & Press — Chef Kenton Lowrie';
 const description =
@@ -23,48 +38,155 @@ const description =
 <Base
   title={title}
   description={description}
+  ogImage="/og/media.jpg"
   breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Media', href: '/media' }]}
 >
-  <PageIntro
-    title="Media & Press"
-    standfirst={`${site.chef.name} — Professional Chef • Author • Founder of ${site.name}`}
-  >
-    <p class="prose">
-      Chef Kenton is available for interviews, culinary features, television and
-      radio appearances, podcasts, speaking opportunities and discussions
-      surrounding food, publishing and entrepreneurship.
-    </p>
-    <p class="prose">
-      Topics can include the inspiration behind Island Meets Italy,
-      Jamaican-Italian culinary fusion, building flavour through strong
-      foundations, recipe development, professional kitchen leadership, cookbook
-      publishing, entrepreneurship and the future of the Island Meets Italy
-      brand.
-    </p>
+  <Section tone="ink" labelledby="media-title" lineCap="top" class="mhero">
+    <div class="mhero__grid">
+      <ChefPortrait
+        treatment="ink"
+        sizes="(min-width: 900px) 28vw, 68vw"
+        loading="eager"
+        class="mhero__portrait"
+      />
 
-    <div class="media__actions">
-      {
-        site.mediaKit.available && (
-          <Button href={site.mediaKit.path} variant="filled" download>
-            Download Author &amp; Book Media Kit
-          </Button>
-        )
-      }
-      <Button href="/contact?type=media" variant="outlined">Media Inquiries</Button>
+      <div class="mhero__copy">
+        <div data-reveal>
+          <h1 class="mhero__title display" id="media-title">Media &amp; Press</h1>
+          <p class="mhero__standfirst display">
+            {site.chef.name} — Professional Chef • Author • Founder of {site.name}
+          </p>
+        </div>
+
+        <p class="prose mhero__avail" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+          Chef Kenton is available for interviews, culinary features, television
+          and radio appearances, podcasts, speaking opportunities and
+          discussions surrounding food, publishing and entrepreneurship.
+        </p>
+
+        <div class="mhero__actions" data-reveal style="--reveal-delay: calc(var(--stagger) * 2)">
+          {
+            site.mediaKit.available && (
+              <Button href={site.mediaKit.path} variant="filled" download>
+                Download Author &amp; Book Media Kit
+              </Button>
+            )
+          }
+          <Button href="/contact?type=media" variant="outlined">Media Inquiries</Button>
+        </div>
+      </div>
     </div>
-  </PageIntro>
+  </Section>
+
+  {/* Topics — the approved sentence, set as a list (§7.5) */}
+  <Section tone="cream" labelledby="topics-title" class="topics">
+    <div class="topics__grid">
+      <div class="topics__headingwrap" data-reveal>
+        <h2 class="topics__title display" id="topics-title">Topics can include</h2>
+      </div>
+
+      <ul class="topics__list" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        {topics.map((topic) => <li class="topics__item display">{topic}</li>)}
+      </ul>
+    </div>
+  </Section>
+
+  <PressList />
 </Base>
 
 <style>
-  .media__actions {
+  .mhero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vh, 2.5rem);
+    padding-block-start: var(--header-h);
+  }
+
+  .mhero__portrait { width: min(68%, 17rem); }
+
+  .mhero__title {
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  .mhero__standfirst {
+    margin-block-start: 1.1rem;
+    font-size: var(--step-1);
+    line-height: 1.3;
+    color: var(--room-mute);
+    text-wrap: balance;
+  }
+
+  .mhero__avail {
+    margin-block-start: clamp(1.5rem, 3vh, 2rem);
+    color: var(--room-mute);
+  }
+
+  .mhero__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-block-start: clamp(2rem, 4vh, 2.75rem);
   }
-  .media__actions > :global(.btn) { flex: 1 1 16rem; }
+  .mhero__actions > :global(.btn) { flex: 1 1 16rem; }
+
+  /* ── Topics ─────────────────────────────────────────────────────────── */
+
+  .topics__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vh, 3rem) 0;
+  }
+
+  .topics__title {
+    font-size: var(--step-3);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+  }
+
+  .topics__list { border-block-start: 1px solid var(--room-rule); }
+
+  .topics__item {
+    padding-block: clamp(0.75rem, 1.8vh, 1.05rem);
+    border-block-end: 1px solid var(--room-rule);
+    font-size: var(--step-1);
+    line-height: 1.3;
+    color: var(--room-text);
+    text-wrap: balance;
+  }
 
   @media (min-width: 900px) {
-    .media__actions > :global(.btn) { flex: 0 0 auto; }
+    .mhero__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 0;
+    }
+    .mhero__portrait {
+      grid-column: 1;
+      justify-self: end;
+      width: min(100%, 21rem);
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .mhero__copy {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .mhero__actions > :global(.btn) { flex: 0 0 auto; }
+
+    .topics__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .topics__headingwrap {
+      grid-column: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .topics__list {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
   }
 </style>

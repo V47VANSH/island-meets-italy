@@ -2,19 +2,17 @@
 /**
  * Cookbook (§7.3).
  *
- * This page carries more than the other openers on purpose: it is where
- * BUY THE BOOK lands until the live purchase URL exists (§10), so it has to
- * answer "what is this book" on its own. Title block, intro, and the book
- * information list.
+ * BUY THE BOOK lands here until the live purchase URL exists (§10), so this
+ * page has to answer "what is this book" on its own.
  *
- * Phase 2 adds "Build the Foundation. Then Build the Dish.", "Created for the
- * Home Kitchen", the hi-res cover on ink with a soft gold edge, and the sticky
- * mobile BUY THE BOOK bar this page alone gets.
+ * The official cover artwork has not been supplied. `BookCover` renders a
+ * typographic panel at paperback proportions in the meantime and takes the
+ * real artwork in the same slot when it arrives — see that component.
  */
 import Base from '@/layouts/Base.astro';
-import PageIntro from '@/components/layout/PageIntro.astro';
-import BookInfo from '@/components/cookbook/BookInfo.astro';
 import Section from '@/components/layout/Section.astro';
+import BookCover from '@/components/cookbook/BookCover.astro';
+import BookInfo from '@/components/cookbook/BookInfo.astro';
 import Button from '@/components/ui/Button.astro';
 import { site, buyUrl } from '@/config/site';
 
@@ -22,7 +20,7 @@ const title = 'Volume 1: Foundations of Flavor — The Cookbook';
 const description =
   'The debut cookbook from Chef Kenton Lowrie. Volume 1: Foundations of Flavor explores the meeting of Jamaican and Italian cuisine. Paperback, CAD $29.99.';
 
-/** Book schema for this page. Null config values are omitted, not emitted (§12). */
+/** Null config values are omitted rather than emitted as empty strings (§12). */
 const bookSchema = {
   '@type': 'Book',
   name: `${site.book.title} — ${site.book.volume}`,
@@ -45,40 +43,241 @@ const bookSchema = {
 <Base
   title={title}
   description={description}
+  ogImage="/og/cookbook.jpg"
   schema={[bookSchema]}
   breadcrumbs={[{ name: 'Home', href: '/' }, { name: 'Cookbook', href: '/cookbook' }]}
+  bodyClass="has-sticky-buy"
 >
-  <PageIntro title="Island Meets Italy" standfirst={site.book.volume}>
-    <div class="cookbook__credits">
-      <p class="cookbook__tagline utility">{site.tagline}</p>
-      <p class="cookbook__author utility">By {site.book.author}</p>
-    </div>
+  {/* Title block + cover */}
+  <Section tone="ink" labelledby="cookbook-title" lineCap="top" class="chero">
+    <div class="chero__grid">
+      <BookCover glow class="chero__cover" />
 
-    <p class="prose">
-      Island Meets Italy: Volume 1 — Foundations of Flavor is the debut cookbook
-      from Chef Kenton Lowrie and the first publication in the Island Meets Italy
-      series. Drawing on more than 20 years of professional culinary experience,
-      the book explores the meeting of Jamaican and Italian cuisine through
-      recipes that respect tradition while creating something distinctive.
-    </p>
+      <div class="chero__copy">
+        <div data-reveal>
+          <h1 class="chero__title display" id="cookbook-title">{site.book.title}</h1>
+          <p class="chero__volume display">{site.book.volume}</p>
+        </div>
 
-    <div class="cookbook__actions">
-      <Button href={buyUrl} variant="filled">Buy the Book</Button>
+        <div class="chero__credits" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+          <p class="chero__tagline utility">{site.tagline}</p>
+          <p class="chero__author utility">By {site.book.author}</p>
+        </div>
+
+        <p class="prose chero__intro" data-reveal style="--reveal-delay: calc(var(--stagger) * 2)">
+          Island Meets Italy: Volume 1 — Foundations of Flavor is the debut
+          cookbook from Chef Kenton Lowrie and the first publication in the
+          Island Meets Italy series. Drawing on more than 20 years of
+          professional culinary experience, the book explores the meeting of
+          Jamaican and Italian cuisine through recipes that respect tradition
+          while creating something distinctive.
+        </p>
+
+        <div class="chero__actions" data-reveal style="--reveal-delay: calc(var(--stagger) * 3)">
+          <Button href={buyUrl} variant="filled">Buy the Book</Button>
+        </div>
+      </div>
     </div>
-  </PageIntro>
+  </Section>
+
+  {/* Build the Foundation. Then Build the Dish. */}
+  <Section tone="cream" labelledby="foundation-title" class="found">
+    <div class="found__grid">
+      <div class="found__headingwrap" data-reveal>
+        <h2 class="found__title display" id="foundation-title">
+          Build the Foundation.<br />Then Build the Dish.
+        </h2>
+      </div>
+
+      <div class="found__body" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        <p class="found__lead display">
+          Great cooking begins with understanding the fundamentals.
+        </p>
+        <p class="prose">
+          Readers begin with sauces, seasonings and foundational preparations
+          before moving into appetizers, fresh pasta, seafood, risotto, main
+          courses, sides, cocktails and desserts. Recipes include clear
+          instructions, professional chef's notes, serving suggestions, pairing
+          recommendations and storage guidance.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  {/* Created for the Home Kitchen */}
+  <Section tone="ink" labelledby="home-kitchen-title" class="homek">
+    <div class="homek__grid">
+      <div class="homek__headingwrap" data-reveal>
+        <h2 class="homek__title display" id="home-kitchen-title">
+          Created for the Home Kitchen
+        </h2>
+      </div>
+
+      <div class="homek__body" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        <p class="prose">
+          You don't need to be a professional chef to cook great food.
+          Foundations of Flavor translates professional techniques into
+          approachable instructions while respecting the craft behind them.
+        </p>
+      </div>
+    </div>
+  </Section>
 
   <BookInfo />
+
+  {/* Sticky purchase bar, this page only, mobile only (§7.3) */}
+  <div class="stickybuy">
+    <a class="stickybuy__link" href={buyUrl}>Buy the Book — {site.book.price}</a>
+  </div>
 </Base>
 
 <style>
-  .cookbook__credits {
+  /* ── Title block ────────────────────────────────────────────────────── */
+
+  .chero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vh, 3rem);
+    padding-block-start: var(--header-h);
+  }
+
+  .chero__cover { width: min(68%, 17rem); }
+
+  .chero__title {
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .chero__volume {
+    margin-block-start: 0.9rem;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--room-mute);
+  }
+
+  .chero__credits {
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
+    margin-block-start: clamp(1.5rem, 3vh, 2rem);
+  }
+  .chero__tagline { color: var(--room-accent); }
+  .chero__author { color: var(--room-mute); }
+
+  .chero__intro {
+    margin-block-start: clamp(1.5rem, 3vh, 2rem);
+    color: var(--room-mute);
   }
 
-  .cookbook__tagline { color: var(--room-accent); }
-  .cookbook__author { color: var(--room-mute); }
+  .chero__actions { margin-block-start: clamp(2rem, 4vh, 2.75rem); }
 
-  .cookbook__actions { margin-block-start: clamp(2rem, 4vh, 2.75rem); }
+  /* ── Two copy sections ──────────────────────────────────────────────── */
+
+  .found__grid,
+  .homek__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vh, 3rem) 0;
+  }
+
+  .found__title,
+  .homek__title {
+    font-size: var(--step-3);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .found__lead {
+    font-size: var(--step-2);
+    line-height: 1.28;
+    color: var(--emerald);
+    text-wrap: balance;
+  }
+  .found__lead + :global(.prose) { margin-block-start: 1.35em; }
+
+  .found__body :global(.prose),
+  .homek__body :global(.prose) { color: var(--room-mute); }
+
+  /* ── Sticky buy, mobile, this page only ─────────────────────────────── */
+
+  .stickybuy {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    padding: 0.75rem var(--gutter) calc(0.75rem + env(safe-area-inset-bottom));
+    background: var(--ink);
+    border-block-start: 1px solid var(--rule-dark);
+  }
+
+  .stickybuy__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    background: var(--gold);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    text-decoration: none;
+  }
+
+  @media (min-width: 900px) {
+    .chero__grid {
+      /* Cover left of the meeting line, the title block right of it. */
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 0;
+    }
+    .chero__cover {
+      grid-column: 1;
+      justify-self: end;
+      width: min(100%, 22rem);
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .chero__copy {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .found__grid,
+    .homek__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    /* Alternating entry sides down the page (§6.1). */
+    .found__headingwrap {
+      grid-column: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .found__body {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .homek__headingwrap {
+      grid-column: 2;
+      grid-row: 1;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .homek__body {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+    .homek__body :global(.prose) { margin-inline-start: auto; }
+
+    /* The sticky bar is a small-screen affordance only (§7.3). */
+    .stickybuy { display: none; }
+  }
 </style>

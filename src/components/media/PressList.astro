@@ -1,0 +1,89 @@
+---
+/**
+ * Press appearances (§7.5).
+ *
+ * Renders nothing at all while the collection is empty — no heading, no
+ * section, no "no press yet" message. An empty state on a public page is
+ * exactly what §10 rules out. Adding the first entry as a JSON file under
+ * src/content/press/ makes the whole section appear.
+ */
+import { getCollection } from 'astro:content';
+import Section from '@/components/layout/Section.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+
+const press = (await getCollection('press')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const TYPE_LABEL: Record<string, string> = {
+  article: 'Article',
+  podcast: 'Podcast',
+  tv: 'Television',
+  radio: 'Radio',
+  feature: 'Feature',
+};
+
+const dateFormat = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: 'long',
+});
+---
+
+{
+  press.length > 0 && (
+    <Section tone="cream" labelledby="press-title" class="press">
+      <div data-reveal>
+        <Eyebrow as="div">
+          <h2 id="press-title" class="press__title">Press &amp; Appearances</h2>
+        </Eyebrow>
+
+        <ul class="press__list">
+          {press.map((entry) => (
+            <li class="press__item">
+              <a class="press__link" href={entry.data.url} rel="noopener noreferrer">
+                <span class="press__outlet utility">{entry.data.outlet}</span>
+                <span class="press__headline display">{entry.data.title}</span>
+                <span class="press__meta utility">
+                  {TYPE_LABEL[entry.data.type] ?? entry.data.type} ·{' '}
+                  {dateFormat.format(entry.data.date)}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Section>
+  )
+}
+
+<style>
+  .press__title { font: inherit; color: inherit; margin: 0; }
+
+  .press__list {
+    margin-block-start: clamp(1.75rem, 4vh, 2.5rem);
+    border-block-start: 1px solid var(--room-rule);
+    max-width: 52rem;
+  }
+
+  .press__item { border-block-end: 1px solid var(--room-rule); }
+
+  .press__link {
+    display: grid;
+    gap: 0.4rem;
+    padding-block: clamp(1rem, 2.5vh, 1.5rem);
+    text-decoration: none;
+    color: var(--room-text);
+    transition: color var(--dur-link) var(--ease-signature);
+  }
+  .press__link:hover { color: var(--room-accent); }
+
+  .press__outlet { color: var(--room-accent); }
+
+  .press__headline {
+    font-size: var(--step-1);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .press__meta { color: var(--room-mute); }
+</style>

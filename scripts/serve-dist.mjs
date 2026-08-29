@@ -8,6 +8,7 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { join, extname } from 'node:path';
+import { gzipSync } from 'node:zlib';
 
 const [, , port = '4600', htmlCache = 'no-cache'] = process.argv;
 const ROOT = 'dist';
@@ -37,11 +38,26 @@ createServer(async (req, res) => {
     const ext = extname(file);
 
     res.setHeader('Content-Type', TYPES[ext] ?? 'application/octet-stream');
+    res.setHeader('Vary', 'Accept-Encoding');
     // Mirrors public/_headers: fingerprinted assets immutable, HTML per arg.
     if (ext === '.html') res.setHeader('Cache-Control', htmlCache);
     else if (path.startsWith('/_astro/') || path.startsWith('/fonts/')) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
+    // Cloudflare compresses text responses automatically; without this the
+    // measurement here is not comparable to production.
+    const compressible = ['.html', '.css', '.js', '.svg', '.xml', '.txt', '.json'];
+    const accepts = String(req.headers['accept-encoding'] ?? '').includes('gzip');
+
+    if (compressible.includes(ext) && accepts) {
+      const zipped = gzipSync(body);
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Content-Length', String(zipped.length));
+      res.writeHead(200);
+      res.end(zipped);
+      return;
+    }
+
     res.writeHead(200);
     res.end(body);
   } catch {

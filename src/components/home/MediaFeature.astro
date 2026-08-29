@@ -1,0 +1,96 @@
+---
+/**
+ * Media feature (§7.1) — ink, type only.
+ *
+ * The last room before the footer. No image on purpose: the page has just
+ * carried three photographic moments, and this closes on type.
+ *
+ * VIEW MEDIA KIT only renders while a file actually exists at the configured
+ * path (§10) — a download button pointing at nothing is a broken link.
+ */
+import Section from '@/components/layout/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import Eyebrow from '@/components/ui/Eyebrow.astro';
+import { site } from '@/config/site';
+---
+
+<Section tone="ink" labelledby="media-feature-title" class="mediafeat">
+  <div class="mediafeat__grid">
+    <div class="mediafeat__headingwrap" data-reveal>
+      <Eyebrow class="mediafeat__eyebrow">Media &amp; Press</Eyebrow>
+      <h2 class="mediafeat__title display" id="media-feature-title">
+        Media &amp; Press
+      </h2>
+    </div>
+
+    <div class="mediafeat__body">
+      <p class="prose" data-reveal style="--reveal-delay: calc(var(--stagger) * 1)">
+        For interviews, media appearances, speaking engagements, partnerships
+        and additional information about Chef Kenton Lowrie and Island Meets
+        Italy.
+      </p>
+
+      <div
+        class="mediafeat__actions"
+        data-reveal
+        style="--reveal-delay: calc(var(--stagger) * 2)"
+      >
+        {
+          site.mediaKit.available && (
+            <Button href={site.mediaKit.path} variant="filled" download>
+              View Media Kit
+            </Button>
+          )
+        }
+        <Button href="/contact?type=media" variant="outlined">Media Inquiries</Button>
+      </div>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .mediafeat__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vh, 3rem) 0;
+  }
+
+  /* The eyebrow repeats the heading string, so it is decorative here. */
+  .mediafeat__eyebrow { display: none; }
+
+  .mediafeat__title {
+    font-size: var(--step-3);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+  }
+
+  .mediafeat__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-block-start: clamp(2rem, 4vh, 2.75rem);
+  }
+  .mediafeat__actions > :global(.btn) { flex: 1 1 14rem; }
+
+  @media (min-width: 900px) {
+    .mediafeat__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .mediafeat__headingwrap {
+      grid-column: 1;
+      justify-self: end;
+      text-align: right;
+      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .mediafeat__body {
+      grid-column: 2;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .mediafeat__body :global(.prose) { color: var(--room-mute); }
+    .mediafeat__actions > :global(.btn) { flex: 0 0 auto; }
+  }
+</style>

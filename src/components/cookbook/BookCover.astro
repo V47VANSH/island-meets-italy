@@ -1,0 +1,129 @@
+---
+/**
+ * The book cover slot.
+ *
+ * The official artwork has not been supplied (§14). Rather than a grey box or
+ * a "coming soon" label — both forbidden by §10 — this renders the cover
+ * *typographically*: title, volume, tagline and author set in the display face
+ * on --ink inside a hairline --gold border, at 2:3, the proportion a trade
+ * paperback actually occupies.
+ *
+ * It should read as a deliberate designed panel, because that is what it is.
+ * Every word on it is approved copy from §4.4.
+ *
+ * When the artwork arrives: drop the file at src/assets/book/cover.jpg (or
+ * .png / .webp / .avif) and it takes this exact slot, at this exact aspect
+ * ratio. No template edit and no layout shift — only the inside of the frame
+ * changes. `book.coverImage` in config records that it is still pending.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { site } from '@/config/site';
+
+interface Props {
+  /** Soft gold edge glow, for the cookbook page hero (§7.3). */
+  glow?: boolean;
+  class?: string;
+}
+const { glow = false, class: className = '' } = Astro.props;
+
+const coverModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/book/cover.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+const cover = Object.values(coverModules)[0]?.default ?? null;
+---
+
+<div class:list={['cover', glow && 'cover--glow', className]}>
+  {
+    cover ? (
+      <Image
+        src={cover}
+        alt={`${site.book.title} — ${site.book.volume}, front cover`}
+        widths={[400, 700, 1000]}
+        sizes="(min-width: 900px) 26rem, 68vw"
+        loading="lazy"
+        class="cover__img"
+      />
+    ) : (
+      <div class="cover__set">
+        <p class="cover__title display">{site.book.title}</p>
+        <span class="cover__rule" aria-hidden="true" />
+        <p class="cover__volume display">{site.book.volume}</p>
+        <p class="cover__tagline utility">{site.tagline}</p>
+        <p class="cover__author utility">{site.book.author}</p>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .cover {
+    /* The proportion of a trade paperback. Holds whether the frame contains
+       type or the finished artwork, so the swap costs no layout. */
+    aspect-ratio: 2 / 3;
+    width: 100%;
+    background: var(--ink);
+  }
+
+  .cover--glow {
+    /* A soft gold edge, not a drop shadow (§7.3). */
+    box-shadow:
+      0 0 0 1px rgba(200, 165, 81, 0.22),
+      0 0 3rem -0.75rem rgba(200, 165, 81, 0.3);
+  }
+
+  .cover__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cover__set {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    border: 1px solid var(--gold);
+    text-align: center;
+    /* On ink, so gold is safe here (§6.2). */
+    color: var(--text-on-dark);
+  }
+
+  .cover__title {
+    font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.6rem);
+    line-height: 1.02;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .cover__rule {
+    width: 2.5rem;
+    height: 1px;
+    margin-block: clamp(1rem, 3vh, 1.5rem);
+    background: var(--gold);
+  }
+
+  .cover__volume {
+    font-size: clamp(0.95rem, 0.8rem + 0.7vw, 1.3rem);
+    line-height: 1.2;
+    color: var(--gold);
+    text-wrap: balance;
+  }
+
+  .cover__tagline {
+    margin-block-start: auto;
+    padding-block-start: clamp(1.5rem, 4vh, 2.5rem);
+    font-size: var(--step--1);
+    color: var(--text-on-dark-mute);
+    text-wrap: balance;
+  }
+
+  .cover__author {
+    margin-block-start: 0.75rem;
+    font-size: var(--step--1);
+    color: var(--text-on-dark);
+  }
+</style>

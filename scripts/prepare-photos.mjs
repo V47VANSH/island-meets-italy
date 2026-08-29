@@ -25,6 +25,18 @@ const OUT = join(root, 'src', 'assets', 'food');
 /** Photo region inside the delivered screenshots. Verified per-file. */
 const CROP = { left: 0, top: 450, width: 1080, height: 1440 };
 
+/**
+ * The author photograph (§14, delivered 29 Aug). Unlike the food photos this
+ * is a real hi-res original — 4000x3000 with EXIF orientation 6, i.e. a
+ * portrait shot stored sideways. Browsers honour that tag but sharp strips
+ * EXIF while processing, so the rotation is baked in here; without it the
+ * portrait renders on its side everywhere astro:assets touches it.
+ *
+ * No colour grade: the grade below exists to rescue phone screenshots, and a
+ * warm midtone push on a studio headshot would only shift skin tones.
+ */
+const PORTRAIT = { from: 'kenton.jpg', to: 'chef/kenton-lowrie.jpg' };
+
 const PHOTOS = [
   { from: '1000014823.jpg', to: 'branzino.jpg' },
   { from: '1000014825.jpg', to: 'panna-cotta.jpg' },
@@ -44,3 +56,12 @@ for (const { from, to } of PHOTOS) {
     .toFile(join(OUT, to));
   console.log(`${from} -> src/assets/food/${to}`);
 }
+
+// `.rotate()` with no argument applies the EXIF orientation, then the tag is
+// dropped along with the rest of the metadata.
+await sharp(join(SRC, PORTRAIT.from))
+  .rotate()
+  .resize({ width: 2000, withoutEnlargement: true })
+  .jpeg({ quality: 92, chromaSubsampling: '4:4:4', mozjpeg: true })
+  .toFile(join(root, 'src', 'assets', PORTRAIT.to));
+console.log(`${PORTRAIT.from} -> src/assets/${PORTRAIT.to}`);
