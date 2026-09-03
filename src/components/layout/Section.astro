@@ -2,11 +2,10 @@
 /**
  * Section — a room (§6.4).
  *
- * Owns three things and nothing else:
+ * Owns two things and nothing else:
  *   1. which room it is (ink or cream), and therefore every colour its
  *      children inherit through --room-*;
- *   2. the vertical rhythm — --section-y top and bottom, generously;
- *   3. its segment of the meeting line.
+ *   2. the vertical rhythm — --section-y top and bottom, generously.
  *
  * Layout inside a section is the child's business. Section deliberately does
  * not set a grid, so child padding and section padding can never fight: the
@@ -16,8 +15,6 @@
  * reach the viewport edge (the hero photograph). Those children handle their
  * own gutters.
  */
-import MeetingLine from './MeetingLine.astro';
-
 interface Props {
   tone: 'ink' | 'cream';
   id?: string;
@@ -33,7 +30,6 @@ interface Props {
    * this root carries Section's scope id, not theirs.
    */
   space?: 'default' | 'tight';
-  lineCap?: 'none' | 'top' | 'bottom' | 'both';
   class?: string;
   as?: 'section' | 'div' | 'footer';
 }
@@ -45,7 +41,6 @@ const {
   bleed = false,
   flush = 'none',
   space = 'default',
-  lineCap = 'none',
   class: className = '',
   as: Tag = 'section',
 } = Astro.props;
@@ -62,7 +57,6 @@ const {
     className,
   ]}
 >
-  <MeetingLine cap={lineCap} />
   {
     bleed ? (
       <div class="section__bleed"><slot /></div>
@@ -74,8 +68,6 @@ const {
 
 <style>
   .section {
-    /* No z-index here: a stacking context would trap the inner content
-       beneath the meeting line. position:relative alone is enough. */
     position: relative;
     background: var(--room-bg);
     color: var(--room-text);
@@ -89,8 +81,6 @@ const {
   .section--flush-both { padding-block: 0; }
 
   .section__inner {
-    position: relative;
-    z-index: 2; /* above the meeting line, which sits at 1 */
     width: 100%;
     max-width: var(--max-w);
     margin-inline: auto;
@@ -98,8 +88,6 @@ const {
   }
 
   .section__bleed {
-    position: relative;
-    z-index: 2;
     width: 100%;
   }
 </style>
