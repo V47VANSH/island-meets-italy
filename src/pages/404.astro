@@ -1,0 +1,105 @@
+---
+/**
+ * 404 (§8 polish pass).
+ *
+ * Uses the image mark rather than a generic error graphic — a wrong turn is
+ * still a brand moment, and the ornament is the one device that reads as this
+ * brand instantly.
+ *
+ * No "coming soon" and no dead ends: every route offered here exists.
+ */
+import Base from '@/layouts/Base.astro';
+import Section from '@/components/layout/Section.astro';
+import Ornament from '@/components/brand/Ornament.astro';
+import Button from '@/components/ui/Button.astro';
+import { site } from '@/config/site';
+---
+
+<Base
+  title="Page not found — Island Meets Italy"
+  description="That page could not be found. Return to Island Meets Italy — the culinary brand of Chef Kenton Lowrie."
+>
+  <Section tone="ink" labelledby="nf-title" lineCap="top" class="nf">
+    <div class="nf__wrap">
+      <Ornament class="nf__ornament" />
+
+      <p class="nf__code utility">Error 404</p>
+      <h1 class="nf__title display" id="nf-title">This page has wandered off.</h1>
+      <p class="nf__body prose">
+        The link may be out of date, or the address slightly off. Everything
+        else is where you left it.
+      </p>
+
+      <div class="nf__actions">
+        <Button href="/" variant="filled">Back to Home</Button>
+        <Button href="/cookbook" variant="outlined">Discover the Book</Button>
+      </div>
+
+      <nav class="nf__nav" aria-label="All pages">
+        <ul class="nf__list">
+          {site.nav.map((item) => (
+            <li><a class="nf__link" href={item.href}>{item.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </Section>
+</Base>
+
+<style>
+  .nf__wrap {
+    padding-block-start: var(--header-h);
+    max-width: 44rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .nf__ornament { margin-block-end: clamp(2rem, 5vh, 3rem); }
+
+  .nf__code { color: var(--room-accent); }
+
+  .nf__title {
+    margin-block-start: 1.1rem;
+    font-size: var(--step-3);
+    line-height: 1.06;
+  }
+
+  .nf__body {
+    margin-block-start: 1.25rem;
+    margin-inline: auto;
+    color: var(--room-mute);
+  }
+
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-block-start: clamp(2rem, 4vh, 2.75rem);
+  }
+
+  .nf__nav {
+    margin-block-start: clamp(2.5rem, 6vh, 4rem);
+    padding-block-start: clamp(1.5rem, 4vh, 2.25rem);
+    border-block-start: 1px solid var(--room-rule);
+  }
+
+  .nf__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.75rem;
+  }
+
+  .nf__link {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-utility);
+    text-decoration: none;
+    color: var(--room-mute);
+    transition: color var(--dur-link) var(--ease-signature);
+  }
+  .nf__link:hover { color: var(--room-accent); }
+</style>

@@ -1,0 +1,23 @@
+---
+/**
+ * The page-foot ornament.
+ *
+ * David sets the mark as a small centred device at the foot of every page of
+ * the media kit. Used here the same way: a quiet section divider, gold on ink
+ * and gold-deep on cream, at a restrained size.
+ */
+import Mark from './Mark.astro';
+interface Props { class?: string }
+const { class: className = '' } = Astro.props;
+---
+<div class:list={['ornament', className]}>
+  <Mark class="ornament__mark" />
+</div>
+<style>
+  .ornament {
+    display: flex;
+    justify-content: center;
+    color: var(--room-accent);
+  }
+  .ornament :global(.ornament__mark) { width: clamp(6rem, 12vw, 9.5rem); }
+</style>

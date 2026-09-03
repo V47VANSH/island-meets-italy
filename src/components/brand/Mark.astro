@@ -1,0 +1,33 @@
+---
+/**
+ * The official image mark — grape vine and palm frond converging in an oval.
+ * Italy and Jamaica meeting.
+ *
+ * Extracted as vector paths from `Logo - Image.pdf` (scripts/pdf2svg.mjs).
+ * Inherits `currentColor` so one file serves gold on ink and gold-deep on
+ * cream — which is exactly how David's own usage sheet specifies it.
+ *
+ * The line work is extremely fine. Below roughly 80px it collapses into mud,
+ * so `simple` swaps to a heavier-stroked reading of the same artwork for
+ * favicons and small marks.
+ */
+interface Props {
+  /** Heavier strokes for small sizes. */
+  simple?: boolean;
+  class?: string;
+}
+const { simple = false, class: className = '' } = Astro.props;
+const svg = (await import('@/assets/brand/mark.svg?raw')).default;
+---
+<span
+  class:list={['mark', simple && 'mark--simple', className]}
+  aria-hidden="true"
+  set:html={svg}
+/>
+<style>
+  .mark { display: block; }
+  .mark :global(svg) { width: 100%; height: auto; display: block; overflow: visible; }
+  /* The artwork is stroked; thickening it keeps the silhouette legible when
+     the detail can no longer resolve. */
+  .mark--simple :global(path) { stroke-width: 2.6; }
+</style>

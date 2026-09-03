@@ -1,0 +1,22 @@
+---
+/**
+ * The official wordmark — "Island meets Italy".
+ *
+ * Outlined vector paths, no text elements and no font references. The
+ * letterforms are Balkist Bold and Bandung Signature, which are commercial
+ * desktop-licence faces that may not be served as webfonts; converting them
+ * to static outlines once, at asset-prep time, is artwork rather than font
+ * distribution. See scripts/wordmark.mjs.
+ *
+ * Inherits `currentColor`, so it inverts between ink and cream rooms.
+ * Always decorative: callers supply the accessible name.
+ */
+interface Props { class?: string }
+const { class: className = '' } = Astro.props;
+const svg = (await import('@/assets/brand/wordmark.svg?raw')).default;
+---
+<span class:list={['wordmark', className]} aria-hidden="true" set:html={svg} />
+<style>
+  .wordmark { display: block; }
+  .wordmark :global(svg) { width: 100%; height: auto; display: block; }
+</style>

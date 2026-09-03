@@ -1,0 +1,116 @@
+---
+/**
+ * The tagline device.
+ *
+ * David's own treatment, from page 2 of the media kit:
+ *
+ *   Where **Island** Soul  *meets*  **Italian** Heart
+ *          green            script    red
+ *
+ * with the remaining words in gold. It encodes the whole concept in one line —
+ * Jamaica's green and Italy's red, joined by the script "meets" from the logo.
+ * Reproduced wherever the tagline appears rather than set as plain text.
+ *
+ * Two things this has to get right:
+ *
+ * 1. The script "meets" is an outlined SVG fragment lifted from the logo, never
+ *    live text. Bandung Signature may not be served as a webfont.
+ *
+ * 2. Colour never carries the meaning on its own. "Island" and "Italian" are
+ *    the words themselves, so the line reads identically to someone who cannot
+ *    separate red from green — the colour is reinforcement, not information.
+ *    The accessible name is the plain sentence.
+ *
+ * Green on cream and red on ink are both large-text-only ratios, so this is
+ * for display sizes. `plain` renders the sentence with no device for the
+ * places that need small type.
+ */
+interface Props {
+  /** Skip the device and render the plain sentence. */
+  plain?: boolean;
+  class?: string;
+}
+const { plain = false, class: className = '' } = Astro.props;
+const meets = (await import('@/assets/brand/meets.svg?raw')).default;
+const SENTENCE = 'Where Island Soul Meets Italian Heart';
+---
+
+{
+  plain ? (
+    <span class:list={['tagline tagline--plain', className]}>{SENTENCE}</span>
+  ) : (
+    <span class:list={['tagline', className]}>
+      {/* `role="text"` would be the neat way to do this but it is a Safari
+          extension, not real ARIA. A hidden copy of the sentence plus a
+          decorative rendering is the portable equivalent. */}
+      <span class="tagline__sr">{SENTENCE}</span>
+      <span aria-hidden="true" class="tagline__inner">
+        <span class="tagline__w">Where</span>
+        {' '}
+        <span class="tagline__island">Island</span>
+        {' '}
+        <span class="tagline__w">Soul</span>
+        {' '}
+        <span class="tagline__meets" set:html={meets} />
+        {' '}
+        <span class="tagline__italian">Italian</span>
+        {' '}
+        <span class="tagline__w">Heart</span>
+      </span>
+    </span>
+  )
+}
+
+<style>
+  .tagline {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 1.25;
+  }
+
+  .tagline--plain { color: var(--room-mute); }
+
+  .tagline__sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tagline__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: inherit;
+    /* Word gap horizontally; a much tighter gap between wrapped lines, or a
+       two-line tagline opens up into a gap the size of a paragraph break. */
+    column-gap: 0.3em;
+    row-gap: 0.05em;
+  }
+
+  /* "Where", "Soul", "Heart" — gold on ink, gold-deep on cream. */
+  .tagline__w { color: var(--room-accent); }
+
+  /* Jamaica and Italy. The words themselves carry the meaning; the colour
+     only reinforces it (§6.2). */
+  .tagline__island { color: var(--room-emphasis); }
+  .tagline__italian { color: var(--red); }
+
+  /* The script fragment, sized to sit on the same baseline as the words. */
+  .tagline__meets {
+    display: inline-block;
+    color: var(--room-accent);
+    width: 2.6em;
+    /* Bandung has a deep descender; nudge it back onto the optical baseline. */
+    transform: translateY(0.10em);
+  }
+  .tagline__meets :global(svg) { width: 100%; height: auto; display: block; }
+
+  /* On cream, --room-emphasis is maroon, which is right for emphasis text but
+     wrong here: this word must read as Jamaica's green. Green on cream is a
+     large-text ratio, which is what this device is for. */
+  :global(.room-cream) .tagline__island { color: var(--green); }
+</style>
