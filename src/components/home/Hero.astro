@@ -32,16 +32,18 @@ const heroDish =
     .sort((a, b) => a.data.order - b.data.order)[0] ?? dishes[0];
 ---
 
-<Section tone="ink" labelledby="hero-title" bleed flush="both" class="hero">
+<Section tone="ink" labelledby="hero-title" bleed flush="both" lineCap="top" class="hero">
   <div class="hero__grid" data-hero>
     <figure class="hero__figure">
       <Image
         src={heroDish.data.image}
         alt={heroDish.data.alt}
-        widths={[480, 640, 800]}
-        {/* Shallow-depth-of-field frame: 800px+ adds no visible detail. LCP, so
-            bytes matter more than marginal sharpness beyond 390px viewport. */}
-        sizes="(min-width: 900px) 34rem, 100vw"
+        widths={[480, 640, 800, 1080]}
+        {/* Capped below 100vw on purpose: at 360px/DPR 2.6 the browser would
+            pull the 1080 variant, and this is a shallow-depth-of-field frame
+            where 800px across a 360px element is already past visible. It is
+            the LCP element, so the bytes matter more than the last 20%. */}
+        sizes="(min-width: 900px) 34rem, 800px"
         loading="eager"
         fetchpriority="high"
         class="hero__image"
@@ -78,9 +80,10 @@ const heroDish =
 
 <style>
   /* ── Hero load sequence — the one choreographed moment (§6.6) ────────
-     1. the wordmark resolves                   900ms
-     2. the photograph reveals by clip-path     900ms from +200ms
-     3. tagline and buttons fade up             from +460ms
+     1. the gold rule draws downward            900ms   (MeetingLine)
+     2. the wordmark resolves                   900ms
+     3. the photograph reveals by clip-path     900ms from +200ms
+     4. tagline and buttons fade up             from +460ms
 
      Gated on js-reveal, which Base only sets when the viewer has not asked for
      reduced motion — so under `prefers-reduced-motion: reduce` none of this
@@ -94,7 +97,7 @@ const heroDish =
     animation: hero-mark 900ms var(--ease-signature) 120ms both;
   }
   :global(html.js-reveal.hero-lit) [data-hero] .hero__figure {
-    animation: hero-image 900ms var(--ease-signature) 0ms both;
+    animation: hero-image 900ms var(--ease-signature) 200ms both;
   }
   :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > * {
     animation: hero-rise 700ms var(--ease-signature) both;
@@ -185,6 +188,7 @@ const heroDish =
   @media (min-width: 900px) {
     .hero__grid {
       min-height: 100svh;
+      /* The column boundary IS the meeting line. */
       grid-template-columns: var(--axis-x) 1fr;
       grid-template-rows: auto minmax(0, 1fr);
       align-content: start;

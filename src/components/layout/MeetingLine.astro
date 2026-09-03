@@ -1,0 +1,77 @@
+---
+/**
+ * MeetingLine — the signature (§6.1).
+ *
+ * A single gold hairline running vertically down the page: the brand's thesis
+ * (two things converging) said structurally rather than in words. Sections
+ * alternate which side they enter from, so the eye crosses it repeatedly.
+ * This is the one bold element on the site. There is no second one.
+ *
+ * Rendered as one full-height segment per section, at --axis-x. Sections are
+ * contiguous, so the segments read as a single unbroken rule from the top of
+ * the page to the footer, scrolling with the content as a spine should.
+ *
+ * DEVIATION from §6.1's implementation note, which asks for a fixed-position
+ * element below all sections. That cannot work here: §6.4 alternates opaque ink
+ * and cream backgrounds, which would paint over a line sitting beneath them,
+ * and --gold at 0.28 is invisible on cream anyway (§6.2 forbids gold on light).
+ * Per-section rendering keeps every stated requirement — continuous, behind
+ * content, pointer-events: none, unbroken on scroll — and additionally lets the
+ * line take a legible colour in each room.
+ *
+ * On mobile --axis-x moves to the left gutter and the line becomes a scroll
+ * spine (§6.4).
+ */
+interface Props {
+  /** Fade the top or bottom of the segment, for the first and last sections. */
+  cap?: 'none' | 'top' | 'bottom' | 'both';
+}
+const { cap = 'none' } = Astro.props;
+---
+
+<span class:list={['meeting-line', `meeting-line--cap-${cap}`]} aria-hidden="true"></span>
+
+<style>
+  .meeting-line {
+    position: absolute;
+    inset-block: 0;
+    left: var(--axis-x);
+    width: 1px;
+    /* --room-line resolves to gold on ink, gold-deep on cream. */
+    background: var(--room-line);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Step 1 of the hero sequence: the rule draws downward (§6.6). Only the
+     hero's own segment animates; the rest of the page's line is already
+     there. Gated on js-reveal, so reduced motion never sees it. */
+  :global(html.js-reveal) :global(.hero) .meeting-line {
+    transform: scaleY(0);
+    transform-origin: top center;
+  }
+  :global(html.js-reveal.hero-lit) :global(.hero) .meeting-line {
+    transform: scaleY(1);
+    transition: transform 900ms var(--ease-signature);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js-reveal) :global(.hero) .meeting-line {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  .meeting-line--cap-top {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%);
+    mask-image: linear-gradient(to bottom, transparent, #000 7%);
+  }
+  .meeting-line--cap-bottom {
+    -webkit-mask-image: linear-gradient(to top, transparent, #000 7%);
+    mask-image: linear-gradient(to top, transparent, #000 7%);
+  }
+  .meeting-line--cap-both {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  }
+</style>
