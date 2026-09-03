@@ -59,9 +59,10 @@ const cover = Object.values(coverModules)[0]?.default ?? null;
 
 <style>
   .cover {
-    /* The proportion of a trade paperback. Holds whether the frame contains
-       type or the finished artwork, so the swap costs no layout. */
-    aspect-ratio: 2 / 3;
+    /* The real cover's proportion, measured off the artwork itself. Holds
+       whether the frame contains the artwork or the typographic fallback, so
+       either way the layout is identical. */
+    aspect-ratio: 1819 / 2355;
     width: 100%;
     background: var(--ink);
   }

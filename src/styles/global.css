@@ -1,26 +1,35 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
-/* ── Self-hosted variable faces (§6.3, §8) ──────────────────────────────
-   No Google CDN: no DNS round trip, no privacy footnote. Latin + latin-ext
-   only — that covers English and the accented Italian words in the copy. */
+/* ── Self-hosted faces ──────────────────────────────────────────────────
+   Josefin Sans only. SIL OFL, fsType 0 — the one supplied face that may be
+   served as a webfont.
+
+   There is deliberately NO @font-face for Balkist Bold or Bandung Signature.
+   Both are commercial desktop-licence faces (Balkist is fsType 4, Preview &
+   Print only) and neither may be served. They appear on this site solely as
+   outlined vector paths inside the logo SVGs, which is artwork, not a font.
+
+   Inter carries long-form body copy. See the note in tokens.css: that split
+   is David's own — the media kit sets headings in Josefin and paragraphs in a
+   neutral humanist sans. */
 
 @font-face {
-  font-family: 'Fraunces';
+  font-family: 'Josefin Sans';
   font-style: normal;
-  font-weight: 300 900;
+  font-weight: 300 700;
   font-display: swap;
-  src: url('/fonts/fraunces-latin.woff2') format('woff2');
+  src: url('/fonts/josefin-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Fraunces';
+  font-family: 'Josefin Sans';
   font-style: normal;
-  font-weight: 300 900;
+  font-weight: 300 700;
   font-display: swap;
-  src: url('/fonts/fraunces-latin-ext.woff2') format('woff2');
+  src: url('/fonts/josefin-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
     U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
     U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
@@ -67,14 +76,13 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* The page never scrolls sideways — full-bleed images are clipped instead. */
   overflow-x: clip;
 }
 
 h1, h2, h3, h4 {
   margin: 0;
   font-weight: 400;
-  line-height: 1.04;
+  line-height: 1.06;
 }
 
 p { margin: 0; }
@@ -88,64 +96,120 @@ a { color: inherit; }
 
 ul, ol { margin: 0; padding: 0; list-style: none; }
 
-/* Display face is for --step-3 and above only (§6.3). Below that it loses
-   its character. WONK on at display sizes, off below. */
+/* Display treatment — Josefin Sans, light and open, the way David sets it
+   across the media kit. Never synthesised bold: only real weights. */
 .display {
   font-family: var(--font-display);
-  font-optical-sizing: auto;
-  font-variation-settings: 'SOFT' 24, 'WONK' 1;
-  font-weight: 400;
-  letter-spacing: -0.015em;
+  font-weight: 300;
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
 }
 
-/* Utility treatment (§6.3): Inter, uppercase, 0.14em tracking, small. */
 .utility {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: var(--step--1);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: var(--tracking-utility);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
-/* Body copy is never full width. */
 .prose {
   max-width: var(--measure);
   font-size: var(--step-0);
   line-height: var(--leading-body);
+  text-wrap: pretty;
 }
 .prose + .prose { margin-top: 1.35em; }
 
 /* ── Rooms ──────────────────────────────────────────────────────────────
-   Two backgrounds, alternating down the page (§6.4). Each room sets the
-   text colours its children inherit, so nothing downstream picks a colour. */
+   Each room publishes the only colours its children may use, so the §6.2
+   contrast rules cannot be broken downstream by accident:
+
+     --room-accent    gold on ink, gold-deep on cream
+     --room-bright    light gold on ink, gold-deep on cream
+     --room-emphasis  green on ink, maroon on cream
+
+   Maroon never reaches an ink room; gold and light gold never reach a cream
+   one. A component just asks for --room-accent. */
 
 .room-ink {
   --room-bg: var(--ink);
   --room-text: var(--text-on-dark);
   --room-mute: var(--text-on-dark-mute);
-  --room-accent: var(--gold);          /* gold is safe on ink */
+  --room-accent: var(--gold);
+  --room-bright: var(--gold-light);
+  --room-emphasis: var(--green);
   --room-rule: var(--rule-dark);
-  --room-line: var(--rule-dark);
+  --room-line: rgba(194, 155, 78, 0.34);
+  --room-focus: var(--gold);
 }
 
 .room-cream {
   --room-bg: var(--cream);
   --room-text: var(--text-on-light);
   --room-mute: var(--text-on-light-mute);
-  --room-accent: var(--gold-deep);      /* never --gold on cream (§6.2) */
+  --room-accent: var(--gold-deep);
+  --room-bright: var(--gold-deep);
+  --room-emphasis: var(--maroon);
   --room-rule: var(--rule-light);
-  --room-line: rgba(140, 109, 40, 0.32);
+  --room-line: rgba(127, 97, 39, 0.34);
+  --room-focus: var(--gold-deep);
 }
 
-/* ── Focus ──────────────────────────────────────────────────── §11 ── */
+/* ── Brand devices ──────────────────────────────────────────────────────
+   Lifted from the cookbook cover and the media kit, not invented. */
+
+/* The grain. The cover's black is textured rather than flat; this ties the
+   ink rooms to the printed book. Deliberately below the threshold of being
+   noticed as an effect — if you can see it as noise, it is too strong. */
+.room-ink { position: relative; }
+.room-ink::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* The double hairline rule. The cover sets thin double rules above and below
+   "JAMAICAN-ITALIAN FUSION RECIPES"; this is that device as the site's
+   section divider, replacing the generic single rule. */
+.rule-double {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-block: 1px solid var(--room-rule);
+  background: transparent;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .room-ink::before { display: none; }
+}
+
+/* Hidden from sight, available to assistive tech. Used wherever decorative
+   artwork (the wordmark, the tagline device) needs a real string beside it. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── Focus (§11) ────────────────────────────────────────────────────── */
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--room-focus, var(--gold));
   outline-offset: 2px;
   border-radius: 1px;
 }
-.room-cream :focus-visible { outline-color: var(--gold-deep); }
 
 .skip-link {
   position: absolute;
@@ -156,7 +220,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   background: var(--gold);
   color: var(--ink);
   padding: 0.75rem 1.25rem;
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: var(--step--1);
   font-weight: 600;
   text-transform: uppercase;
@@ -167,12 +231,9 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .skip-link:focus-visible { transform: translateY(0); }
 
 /* ── Scroll reveal (§6.6) ───────────────────────────────────────────────
-   Declared globally and keyed on the [data-reveal] attribute rather than
-   scoped inside Reveal.astro. Astro scopes a component's CSS to elements in
-   that component's own template, so a wrapper component can never be styled
-   by its parent — put the attribute on an element you own and your own
-   layout rules keep working. `Reveal.astro` is still there for the cases
-   where an extra wrapper is harmless. */
+   Keyed on the attribute rather than scoped inside Reveal.astro: Astro scopes
+   a component's CSS to its own template, so a wrapper can never be styled by
+   its parent. Put the attribute on an element you own. */
 
 html.js-reveal [data-reveal] {
   transition:
@@ -180,8 +241,6 @@ html.js-reveal [data-reveal] {
     transform var(--dur-reveal) var(--ease-signature) var(--reveal-delay, 0ms);
 }
 
-/* Hidden only once we know JS is running and motion is welcome, so content is
-   never left invisible if the script fails or never loads. */
 html.js-reveal [data-reveal]:not(.is-revealed) {
   opacity: 0;
   transform: translateY(12px);

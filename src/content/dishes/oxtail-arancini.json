@@ -2,8 +2,8 @@
   "name": "Oxtail Arancini",
   "shortName": "Oxtail Arancini",
   "image": "../../assets/food/oxtail-arancini.jpg",
-  "alt": "Oxtail Arancini: golden breadcrumbed risotto balls on a dark speckled plate, one broken open to show braised oxtail and creamy risotto inside, served with a small white ramekin of marinara and finished with grated parmesan and chopped parsley.",
+  "alt": "Oxtail Arancini: a golden breadcrumbed Sicilian rice ball broken open to show slow-braised Jamaican oxtail and creamy risotto inside, on a dark speckled plate beside a small white ramekin of marinara, finished with grated parmesan and parsley.",
   "plateTone": "dark",
-  "order": 3,
-  "featured": false
+  "order": 1,
+  "featured": true
 }

@@ -2,37 +2,34 @@
 /**
  * Hero (§7.1) — the thesis and the signature working together.
  *
- * Mobile is the base layout, not a reduction of the desktop one (§6.4): the
- * photograph runs full-bleed across the top at ~55svh, the wordmark stacks
- * beneath it with MEETS crossing the scroll spine in the left margin, then the
- * copy. At 900px the layout becomes the split described in §7.1 — ISLAND left
- * of the meeting line, ITALY right of it, MEETS straddling it in gold, copy
- * left of the axis and the photograph right of it, bleeding off the edge.
+ * The official wordmark replaces the Fraunces-typeset ISLAND / MEETS / ITALY
+ * that stood in before the brand assets existed. That treatment invented a
+ * lockup; David had already made one, and his has the script "meets" sitting
+ * between the two serif words — precisely the gesture the placeholder was
+ * imitating.
  *
- * DEVIATION, flagged. §7.1 asks for a 55/45 split with the wordmark inside the
- * left column *and* straddling the page-centre rule at --step-5. Those cannot
- * both hold: at --step-5 on a 1440px viewport ITALY alone is ~340px wide and
- * would run from the axis (720px) to ~1060px, well inside a 45% image column
- * beginning at 792px. So the wordmark takes the full width and genuinely
- * straddles the axis, and the split happens on the row beneath it — copy left,
- * photograph right, still full-bleed. Everything §7.1 asks for is present; only
- * the stacking order of the split changed.
+ * So the wordmark is positioned by its "meets" rather than by its own centre:
+ * the script lands on the meeting line and "Island" and "Italy" fall either
+ * side of it, exactly as §6.1 describes. The signature and the brand are now
+ * the same object.
  *
- * The photograph is sized by height at its native 3:4 on desktop, so it is
- * never cropped to landscape — §5.2 warns that none of the four are landscape.
+ * Mobile is the base layout, not a reduction (§6.4): photograph full-bleed
+ * across the top at ~55svh, the wordmark beneath it, then the copy.
  */
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import Section from '@/components/layout/Section.astro';
 import Button from '@/components/ui/Button.astro';
+import Wordmark from '@/components/brand/Wordmark.astro';
+import Tagline from '@/components/brand/Tagline.astro';
 
 const dishes = await getCollection('dishes');
 // Hero art direction is data-driven: the dark-plate dish flagged `featured`
-// with the highest order. Changing the hero photograph is a content edit.
+// with the lowest order. Changing the hero photograph is a content edit.
 const heroDish =
   dishes
     .filter((d) => d.data.plateTone === 'dark' && d.data.featured)
-    .sort((a, b) => b.data.order - a.data.order)[0] ?? dishes[0];
+    .sort((a, b) => a.data.order - b.data.order)[0] ?? dishes[0];
 ---
 
 <Section tone="ink" labelledby="hero-title" bleed flush="both" lineCap="top" class="hero">
@@ -42,28 +39,25 @@ const heroDish =
         src={heroDish.data.image}
         alt={heroDish.data.alt}
         widths={[480, 640, 800, 1080]}
-        sizes="(min-width: 900px) 36rem, 100vw"
+        {/* Capped below 100vw on purpose: at 360px/DPR 2.6 the browser would
+            pull the 1080 variant, and this is a shallow-depth-of-field frame
+            where 800px across a 360px element is already past visible. It is
+            the LCP element, so the bytes matter more than the last 20%. */}
+        sizes="(min-width: 900px) 34rem, 800px"
         loading="eager"
         fetchpriority="high"
         class="hero__image"
       />
     </figure>
 
-    {/*
-      One copy of the string, split across three positioned spans. The earlier
-      version paired a visually-hidden "Island Meets Italy" with three
-      aria-hidden words: correct for a screen reader, but the text existed twice
-      in the DOM, so it read twice in raw text and would have shown twice if the
-      CSS failed. The accessible name here is still exactly "Island Meets Italy".
-    */}
+    {/* The <h1> carries the real string; the artwork is decorative. */}
     <h1 class="hero__wordmark" id="hero-title">
-      <span class="hero__word hero__word--island display">Island</span>
-      <span class="hero__word hero__word--meets display">Meets</span>
-      <span class="hero__word hero__word--italy display">Italy</span>
+      <span class="visually-hidden">Island Meets Italy</span>
+      <Wordmark />
     </h1>
 
     <div class="hero__copy">
-      <p class="hero__tagline display">Where Island Soul Meets Italian Heart</p>
+      <div class="hero__taglinewrap"><Tagline /></div>
 
       <p class="hero__journey utility">
         Jamaican soul. Italian tradition. One culinary journey.
@@ -86,78 +80,58 @@ const heroDish =
 
 <style>
   /* ── Hero load sequence — the one choreographed moment (§6.6) ────────
-     1. the gold rule draws downward           900ms
-     2. ISLAND from the left, ITALY from the right, MEETS last   700ms / 80ms
-     3. the photograph reveals by clip-path    900ms, from +200ms
-     4. tagline and buttons fade up            from +400ms
+     1. the gold rule draws downward            900ms   (MeetingLine)
+     2. the wordmark resolves                   900ms
+     3. the photograph reveals by clip-path     900ms from +200ms
+     4. tagline and buttons fade up             from +460ms
 
-     Only runs when the document is marked js-reveal — that class is not added
-     under prefers-reduced-motion, so everything below simply never applies and
-     the hero paints at its final state on the first frame. */
+     Gated on js-reveal, which Base only sets when the viewer has not asked for
+     reduced motion — so under `prefers-reduced-motion: reduce` none of this
+     applies and the hero paints at final state on the first frame. */
 
-  :global(html.js-reveal) [data-hero] :is(.hero__word, .hero__copy > *),
-  :global(html.js-reveal) [data-hero] .hero__figure {
+  :global(html.js-reveal) [data-hero] :is(.hero__wordmark, .hero__figure, .hero__copy > *) {
     opacity: 0;
-    will-change: transform, opacity, clip-path;
   }
 
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__word {
-    animation: hero-word 700ms var(--ease-signature) both;
+  :global(html.js-reveal.hero-lit) [data-hero] .hero__wordmark {
+    animation: hero-mark 900ms var(--ease-signature) 120ms both;
   }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__word--island {
-    --from-x: -1.5rem;
-    animation-delay: 160ms;
-  }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__word--italy {
-    --from-x: 1.5rem;
-    animation-delay: 240ms;
-  }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__word--meets {
-    --from-x: 0;
-    animation-delay: 400ms;
-  }
-
   :global(html.js-reveal.hero-lit) [data-hero] .hero__figure {
     animation: hero-image 900ms var(--ease-signature) 200ms both;
   }
-
   :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > * {
     animation: hero-rise 700ms var(--ease-signature) both;
   }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(1) { animation-delay: 400ms; }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(2) { animation-delay: 480ms; }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(3) { animation-delay: 560ms; }
-  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(4) { animation-delay: 640ms; }
+  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(1) { animation-delay: 460ms; }
+  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(2) { animation-delay: 540ms; }
+  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(3) { animation-delay: 620ms; }
+  :global(html.js-reveal.hero-lit) [data-hero] .hero__copy > :nth-child(4) { animation-delay: 700ms; }
 
-  @keyframes hero-word {
-    from { opacity: 0; transform: translateX(var(--from-x, 0)); }
+  @keyframes hero-mark {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
     to   { opacity: 1; transform: none; }
   }
-
   @keyframes hero-image {
     from { opacity: 0; clip-path: inset(0 0 100% 0); }
     to   { opacity: 1; clip-path: inset(0 0 0 0); }
   }
-
   @keyframes hero-rise {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(html.js-reveal) [data-hero] :is(.hero__word, .hero__copy > *),
-    :global(html.js-reveal) [data-hero] .hero__figure {
+    :global(html.js-reveal) [data-hero] :is(.hero__wordmark, .hero__figure, .hero__copy > *) {
       opacity: 1;
       animation: none;
-      will-change: auto;
     }
   }
 
   /* ── Mobile (base) ──────────────────────────────────────────────────── */
 
-  /* Header clearance lives on the grid, not on the section. Section owns
-     section padding; a child that also sets padding-block on the same element
-     is a specificity coin-toss with .section--flush-*. */
+  /* Header clearance sits on the grid, not the section: Section owns section
+     padding, and a child setting padding-block on the same element is a
+     specificity coin-toss with .section--flush-*. */
   .hero__grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -165,50 +139,35 @@ const heroDish =
     padding-block: var(--header-h) clamp(3rem, 8vh, 4.5rem);
   }
 
-  /* Photograph first: portrait, ~55svh, full-bleed across the top. */
-  .hero__figure {
-    margin: 0 calc(var(--gutter) * -1);
-  }
+  .hero__figure { margin: 0 calc(var(--gutter) * -1); }
 
   .hero__image {
     width: 100vw;
+    max-width: none;
     height: 55svh;
     object-fit: cover;
-    object-position: center 42%;
+    /* The fusion is visible in the cut arancino — Sicilian rice ball, Jamaican
+       oxtail inside — so the crop favours it and the marinara ramekin, which is
+       also the sharpest part of a shallow-depth-of-field frame. */
+    object-position: 52% 68%;
   }
 
   .hero__wordmark {
-    display: block;
+    /* Gold on ink. Set here, on the element this component owns — the class
+       handed to <Wordmark> lands on that component's own span and carries its
+       scope id, so a rule for it here would silently never match. */
+    color: var(--gold);
     padding-block-start: clamp(2rem, 6vh, 3rem);
   }
-
-  .hero__word {
-    display: block;
-    font-size: var(--step-4);
-    line-height: 0.98;
-    letter-spacing: -0.025em;
-    text-transform: uppercase;
-  }
-
-  /* MEETS crosses the scroll spine out in the left margin. */
-  .hero__word--meets {
-    margin-inline-start: -1rem;
-    font-size: var(--step-2);
-    color: var(--gold);
-    letter-spacing: 0.02em;
-  }
+  .hero__wordmark :global(.wordmark) { width: 100%; }
 
   .hero__copy { padding-block-start: 1.75rem; }
 
-  .hero__tagline {
-    font-size: var(--step-2);
-    line-height: 1.2;
-    color: var(--room-mute);
-  }
+  .hero__taglinewrap :global(.tagline) { font-size: var(--step-1); }
 
   .hero__journey {
     margin-block-start: 1.5rem;
-    color: var(--gold);
+    color: var(--room-accent);
   }
 
   .hero__intro {
@@ -227,91 +186,68 @@ const heroDish =
   /* ── Desktop: the split hero (§7.1) ─────────────────────────────────── */
 
   @media (min-width: 900px) {
-    /* The viewport sizing lives on the grid, not on the section root: a child
-       component's scoped CSS never matches the Section element, which carries
-       Section's own scope id. */
     .hero__grid {
       min-height: 100svh;
-      /* The column boundary IS the meeting line. Everything aligns to it. */
+      /* The column boundary IS the meeting line. */
       grid-template-columns: var(--axis-x) 1fr;
-      grid-template-rows: auto auto auto minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
       align-content: start;
       padding-inline: 0;
-      /* Clears the fixed header, and keeps the whole hero inside one viewport.
-         No bottom padding: the photograph runs to the section edge. The copy
-         column carries its own. */
       padding-block: calc(var(--header-h) + clamp(0.5rem, 2vh, 1.25rem)) 0;
     }
 
-    .hero__wordmark { display: contents; }
-
-    .hero__word {
-      font-size: var(--step-5);
-      line-height: 0.92;
-    }
-
-    .hero__word--island {
-      grid-column: 1;
+    /* Full width, then nudged so the script "meets" — which sits right of
+       centre inside the lockup — lands on the axis rather than the lockup's
+       own midpoint. */
+    .hero__wordmark {
+      grid-column: 1 / -1;
       grid-row: 1;
-      justify-self: end;
-      /* Optical: uppercase Fraunces carries a little right side bearing. */
-      margin-inline-end: -0.04em;
+      display: flex;
+      justify-content: center;
+      padding-block-start: 0;
+      padding-inline: var(--edge-x);
     }
-
-    .hero__word--meets {
-      grid-column: 1;
-      grid-row: 2;
-      justify-self: end;
-      /* Centred on the column boundary — straddling the line. */
-      transform: translateX(50%);
-      margin-inline-start: 0;
-      font-size: var(--step-3);
-    }
-
-    .hero__word--italy {
-      grid-column: 2;
-      grid-row: 3;
-      justify-self: start;
-      margin-inline-start: -0.03em;
+    .hero__wordmark :global(.wordmark) {
+      width: min(100%, 56rem);
+      transform: translateX(-7.6%);
     }
 
     .hero__copy {
       grid-column: 1;
-      grid-row: 4;
-      align-self: center;
+      grid-row: 2;
+      /* Starts under the wordmark rather than centring in a tall row — the
+         tagline belongs to the mark above it, and centring opened a gap the
+         size of a section between the two. */
+      align-self: start;
       padding-inline: var(--edge-x) clamp(1.5rem, 4vw, 4rem);
-      padding-block: clamp(2rem, 5vh, 3.5rem);
+      padding-block: clamp(2.5rem, 7vh, 4.5rem) clamp(2rem, 5vh, 3.5rem);
     }
 
+    .hero__taglinewrap :global(.tagline) { font-size: var(--step-1); }
     .hero__intro { max-width: 46ch; }
-
     .hero__actions > :global(.btn) { flex: 0 0 auto; }
 
     .hero__figure {
       grid-column: 2;
-      grid-row: 4;
-      /* `justify-self: end` rather than an auto margin — a stretched grid item
-         ignores its aspect-ratio and fills the column instead. */
+      grid-row: 2;
       justify-self: end;
-      /* Sits on the bottom edge of the section, which carries no padding. */
       align-self: end;
       margin: 0;
       padding: 0;
-      /* Height is bound to the viewport, not to the grid row. The row has no
-         definite height, so `height: 100%` here would resolve to auto, the
-         aspect-ratio would then derive height from max-width, and the row
-         would grow to fit it — inflating the hero past one viewport.
-         Driving from svh breaks that loop and keeps the box exact, so the
-         photograph is never cropped towards landscape (§5.2). */
-      height: clamp(20rem, 62svh, 42rem);
+      /* Height is bound to the viewport, not the grid row: the row has no
+         definite height, so `height: 100%` would resolve to auto, the
+         aspect-ratio would derive height from max-width, and the row would
+         grow to fit it — inflating the hero past one viewport. */
+      height: clamp(20rem, 54svh, 40rem);
       aspect-ratio: var(--photo-portrait);
       max-width: 100%;
     }
 
     .hero__image {
       width: 100%;
+      max-width: 100%;
       height: 100%;
-      object-position: center;
+      object-position: 52% 68%;
     }
   }
 </style>
@@ -319,22 +255,14 @@ const heroDish =
 <script>
   /**
    * Fires the hero load sequence by adding `hero-lit` to <html> after the
-   * first paint, so the animations have a frame to start from.
-   *
-   * Gated on js-reveal, which Base only sets when the viewer has not asked for
-   * reduced motion — so under `prefers-reduced-motion: reduce` this class is
-   * never added and the hero is simply there, at final state, immediately.
+   * first paint, so the animations have a frame to start from. Gated on
+   * js-reveal, which is absent under prefers-reduced-motion.
    */
   function litHero() {
     const root = document.documentElement;
     if (!root.classList.contains('js-reveal')) return;
-
     root.classList.remove('hero-lit');
-
-    // Only the home page has a hero; leaving the class on would light the
-    // sequence again on a route that has nothing to animate.
     if (!document.querySelector('[data-hero]')) return;
-
     requestAnimationFrame(() => {
       requestAnimationFrame(() => root.classList.add('hero-lit'));
     });

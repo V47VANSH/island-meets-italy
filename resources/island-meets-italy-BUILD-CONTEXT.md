@@ -290,27 +290,48 @@ Inquiry types: `General Inquiry` | `Media & Press` | `Partnerships` | `Speaking 
 - All page copy (§4)
 - Book information, except ISBN and publication date
 
-### 5.2 The four approved dishes
+### 5.2 Approved photography
 
-**Only these four images may be used. No AI-generated or artificially recreated food imagery — this is an explicit client prohibition.**
+**Only these images may be used. No AI-generated or artificially recreated food
+imagery — this is an explicit client prohibition.**
 
-| # | Dish | Plate | Suggested placement |
+| # | Dish | Plate | Placement |
 |---|---|---|---|
-| 1 | Lime & Coconut Panna Cotta — Caramelized Pineapple & Toasted Coconut | **Dark** slate, mint garnish, two red coulis dots | **Hero.** Best match for the dark palette |
-| 2 | Oxtail Arancini | **Dark** slate, marinara ramekin, warm tones | Cookbook feature section (dark) |
-| 3 | Whole Branzino — Brown Stew Reduction, Coconut-Thyme Rice & Pickled Vegetables | **White** rectangular plate, wooden table | Food feature (light room) — the signature dish |
-| 4 | Mango Caprese | **White** plate, yellow/white/green | Gallery, About page accent (light room) |
+| 1 | Oxtail Arancini | **Dark** slate, marinara ramekin | **Hero.** The cut-open arancino shows Jamaican oxtail inside a Sicilian rice ball — the fusion is visible rather than asserted |
+| 2 | Whole Branzino | **White** rectangular plate | Home food feature (cream). The signature dish; largest in the gallery |
+| 3 | Lime & Coconut Panna Cotta | **Dark** slate, mint, two coulis dots | Home cookbook feature (ink) |
+| 4 | Mango Caprese | **White** plate | About page accent (cream), gallery |
 
-**Critical constraint.** Four images must carry a hero, a home food feature, an entire gallery, the cookbook page and the About page. Two consequences, both non-negotiable:
+Plus the **approved author photograph** (delivered 29 Aug 2026): a straight-on
+studio headshot — black chef's coat, gold chain, cream curtain backdrop. It is
+the only portrait available; there is no wide or environmental crop, so no
+section is designed around one. Used three times, in two treatments:
 
-1. **The design is typography-led, not photography-led.** Photos appear at a few large, deliberate moments. Filler images do not exist. This aligns with the client's own request for generous negative space.
-2. **Plate colour drives section background.** Dark-plate dishes (1, 2) sit in ink sections. White-plate dishes (3, 4) sit in cream sections. This is why the page alternates dark and light rooms — it is a solution to the asset constraint, not decoration.
+- **cream rooms** — the curtain is close to `--cream`, so a soft all-round mask
+  dissolves the frame entirely and the portrait reads as printed onto the page
+- **ink rooms** — the black coat already matches `--ink`, so the mask leans on
+  the bottom: shoulders and coat fall away, face and chain hold the frame
 
-No image appears more than twice, and never with the same crop.
+**Constraints.**
 
-**Orientation.** None of the four are landscape. Do not build a full-bleed wide hero — it will crop badly. Use the split hero described in §7.1.
+1. **The design is typography-led, not photography-led.** Photographs appear at
+   a few large, deliberate moments. Filler images do not exist.
+2. **Plate colour drives section background.** Dark-plate dishes sit in ink
+   rooms, white-plate dishes in cream rooms. `plateTone` in the content
+   collection encodes this, so a component picks the right room automatically.
+3. **No food photograph appears more than twice, and never with the same crop.**
+   The homepage uses a 4:5 box throughout; the gallery shows the native 3:4
+   uncropped; the About accent is a 21:9 detail band.
 
-**Image quality.** These are competent phone photographs, not studio work. Apply a light, consistent grade (subtle contrast lift, slightly warm midtones, no heavy filter). Crop tight and scale large — scale reads as confidence; small images read as stock.
+**Source quality.** The four food photographs were delivered as Android
+screenshots (1080x2340) of a gallery viewer, containing the real image at
+1080x1440 starting at y=450. `scripts/prepare-photos.mjs` strips that chrome and
+applies a light grade. **Hi-res originals are still outstanding.** The author
+photograph is a genuine 4000x3000 original with EXIF orientation 6; the rotation
+is baked in during prep because sharp strips EXIF.
+
+**Orientation.** None of the food photographs are landscape. Do not build a
+full-bleed wide hero from them.
 
 ### 5.3 Expected asset package structure
 
@@ -344,73 +365,120 @@ Implementation: a `1px` fixed-position pseudo-element at `--gold` with low opaci
 
 ### 6.2 Colour tokens
 
-Placeholders until David supplies exact specifications. **Every colour must be a CSS custom property in one place** so swapping is a single-file change.
+**Official brand specification, supplied by the client's designer (David).**
+These replace the placeholders used in earlier phases. **There is no emerald in
+this brand.**
+
+The system is the two flags — Jamaica's green and gold, Italy's green and red —
+held together by gold.
 
 ```css
 :root {
-  /* Surfaces */
-  --ink:         #0C0C0B;  /* warm near-black — never pure #000 */
-  --ink-raised:  #161614;  /* cards, raised blocks on dark */
-  --cream:       #FBF8F3;  /* light rooms — paper, not clay */
-  --cream-sunk:  #F2EDE4;  /* subtle blocks on cream */
+  /* Surfaces. No black or off-white was specified; the cover is
+     effectively black with a fine grain. */
+  --ink:        #0C0C0B;
+  --ink-raised: #161614;
+  --cream:      #FBF8F3;
+  --cream-sunk: #F2EDE4;
 
   /* Brand */
-  --gold:        #C8A551;  /* accent on dark ONLY */
-  --gold-deep:   #8C6D28;  /* accent/text on light — passes AA */
-  --emerald:     #0A5741;  /* deep — text on cream, surfaces */
-  --emerald-lit: #127A5C;  /* accent on dark */
-
-  /* Text */
-  --text-on-dark:      #F3EFE8;
-  --text-on-dark-mute: #A8A399;
-  --text-on-light:      #16150F;
-  --text-on-light-mute: #5A5750;
-
-  /* Lines */
-  --rule-dark:  rgba(200, 165, 81, 0.28);
-  --rule-light: rgba(22, 21, 15, 0.14);
+  --gold:       #C29B4E;  /* primary. INK ONLY */
+  --gold-light: #E6C161;  /* INK ONLY */
+  --gold-deep:  #7F6127;  /* David's "alternative where applicable" — the
+                             light-background gold. CREAM ONLY */
+  --maroon:     #6D0000;  /* CREAM ONLY */
+  --green:      #009548;
+  --red:        #DE2128;
 }
 ```
 
-**Contrast rules — enforce these, the client made accessibility a requirement:**
+**Measured contrast. Enforce, do not guess.**
 
-- `--gold` (#C8A551) is for dark backgrounds only. It fails against cream.
-- On light backgrounds use `--gold-deep` (#8C6D28) for any text.
-- Never gold text on white or cream.
-- Body text minimum 4.5:1, large display text minimum 3:1.
+| | on `--ink` | on `--cream` |
+|---|---|---|
+| `--gold` #C29B4E | 7.54 AA | 2.45 **fails** |
+| `--gold-light` #E6C161 | 11.34 AA | 1.63 **fails** |
+| `--gold-deep` #7F6127 | 3.39 large only | 5.44 AA |
+| `--maroon` #6D0000 | 1.54 **fails** | 12.01 AA |
+| `--green` #009548 | 5.03 AA | 3.68 large only |
+| `--red` #DE2128 | 4.06 large only | 4.55 AA |
+
+- **Ink rooms:** gold and light gold for accents, green as second accent.
+  Never maroon.
+- **Cream rooms:** gold-deep for accents, maroon for emphasis text. Never gold
+  or light gold.
+
+Each room publishes only the colours its children may use — `--room-accent`,
+`--room-bright`, `--room-emphasis` — so a component asks for a role and cannot
+break the rule by accident.
+
+**Red and green never carry meaning alone.** Roughly 8% of men cannot reliably
+separate them; they always appear alongside text, position or shape.
+
+`scripts/contrast.mjs` checks every page for both prohibitions and for AA.
 
 ### 6.3 Typography
 
-Two roles, plus a utility treatment. **Placeholders until David supplies official typography — wire them as CSS variables (`--font-display`, `--font-body`) so the swap is one line.**
+**Josefin Sans is the brand face** — and the only supplied font that may be
+served as a webfont.
 
 | Role | Face | Why |
 |---|---|---|
-| Display | **Fraunces** (variable: `opsz`, `wght`, `SOFT`, `WONK`) | Warm, editorial, has genuine character at large sizes. Suits "refined but not pretentious." Not the overused Playfair/Cormorant default. |
-| Body / UI | **Inter** (variable) | Neutral, excellent at small sizes, has tabular numerals for the book-info table |
-| Utility | Inter, uppercase, `0.14em` tracking, small | Eyebrows, labels, section markers |
+| Display | **Josefin Sans** (300-700, variable) | The official brand face. Set light and generously tracked, as David sets it throughout the media kit |
+| Body | **Inter** (variable) | Neutral, large x-height, OFL. See below |
+| Utility | Josefin Sans, uppercase, `0.16em` tracking | Eyebrows, labels, buttons, nav |
 
-Self-host both. Do not load from Google's CDN — it costs a DNS round trip and a privacy footnote.
+**Font licensing — no exceptions.**
 
-**Type scale** (fluid, `clamp()`):
+Only Josefin Sans may be served. SIL OFL, fsType 0, verified from the font
+binary rather than taken on trust.
 
-```css
---step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);
---step-0:  clamp(1rem, 0.96rem + 0.2vw, 1.13rem);
---step-1:  clamp(1.25rem, 1.15rem + 0.5vw, 1.6rem);
---step-2:  clamp(1.56rem, 1.35rem + 1vw, 2.25rem);
---step-3:  clamp(1.95rem, 1.6rem + 1.8vw, 3.2rem);
---step-4:  clamp(2.44rem, 1.85rem + 2.9vw, 4.5rem);
---step-5:  clamp(3.05rem, 2.1rem + 4.7vw, 6.5rem);
-```
+**Balkist Bold and Bandung Signature must NOT enter the build.** Both are
+commercial faces from independent designers (Mulkan Nazir / Great Studio;
+arendxstudio) with no embedded licence — Balkist is fsType 4, *Preview & Print
+only*. The client's desktop licence covers making artwork, not serving fonts.
+They appear on the site **only as outlined vector paths inside the logo SVGs**,
+which is artwork. There is deliberately no `@font-face` for either, and no
+`.otf` is copied into the repository.
+
+**Why the body face is not Josefin.** This is David's own structure, not a
+compromise: page 5 of the media kit sets the heading in Josefin and the body
+paragraphs in a neutral humanist sans with a much larger x-height. Josefin has a
+small x-height and geometric, near-identical round letterforms; at 16px over a
+six-line paragraph it is read letter by letter rather than by word shape.
+Setting long copy in it would misread the system rather than honour it.
 
 **Rules**
 
-- Display face at `--step-3` and above only. Below that it loses its character and starts to feel decorative.
-- Fraunces `WONK` axis on at display sizes, off below.
-- Body copy: `1.7` line-height, `65ch` max measure. Never full-width paragraphs.
-- Eyebrow labels (`THE DEBUT COOKBOOK`, `MEDIA & PRESS`) in the utility treatment, in `--gold` on dark / `--gold-deep` on light.
-- Book info table uses `font-variant-numeric: tabular-nums`.
-- Sentence case in body copy. The client's uppercase headings and button labels are intentional — keep them uppercase.
+- Display face for headings, labels and the wordmark; Inter for running prose
+- Never synthesise bold on Josefin — only real weights from the variable font
+- Body copy: `1.75` line-height, `65ch` max measure
+- `text-wrap: balance` on headings, `pretty` on body
+- Book info table uses `font-variant-numeric: tabular-nums`
+- The client's uppercase headings and button labels stay uppercase, applied with
+  `text-transform` so screen readers are not given literal all-caps
+
+### 6.3a Brand devices
+
+Lifted from the cookbook cover and the media kit. Do not invent beyond these.
+
+- **The tagline treatment.** *Where **Island** Soul* — script *meets* —
+  ***Italian** Heart*: "Island" in green, "Italian" in red, "meets" as an
+  outlined SVG fragment from the logo, the rest in gold. David's own device; it
+  encodes the concept in one line. Reproduced wherever the tagline appears.
+  Colour is reinforcement only — the words carry the meaning, and the accessible
+  name is the plain sentence.
+- **The ornament.** The grape-and-palm mark appears at the foot of every media
+  kit page. Used the same way: a quiet section divider or page-foot device, gold
+  on ink and gold-deep on cream, at a restrained size.
+- **The double hairline rule.** The cover sets thin double rules above and below
+  "JAMAICAN-ITALIAN FUSION RECIPES". Adopted as the section divider, replacing
+  generic single rules.
+- **The grain.** The cover's black is textured rather than flat. A very
+  low-opacity grain on ink sections ties the site to the printed book. If it is
+  visible as an effect it is too strong.
+- **The oval.** The cover places the mark on a maroon oval — available as a
+  containing shape on cream.
 
 ### 6.4 Layout
 
@@ -854,26 +922,26 @@ The client asked for "fast loading and optimized for high-resolution food photog
 
 ## 14. Pending from client
 
-Build every one of these so it drops in without template changes.
+**Delivered.** Official logo (EPS + PDF), exact brand colour codes, official
+typography, author photograph, book cover artwork (interim — see below).
 
-| Item | Blocks | From |
+Still outstanding:
+
+| Item | Blocks | Notes |
 |---|---|---|
-| Official logo + vector/SVG | Header, footer, hero, favicon | David |
-| Exact brand colour codes | Final palette (placeholders in §6.2) | David |
-| Official typography | Final type (placeholders in §6.3) | David |
-| Hi-res book cover | Cookbook page, home feature | Kenton |
-| Author photograph | About, Home, Media | Kenton |
-| Four hi-res food photographs | Everything visual | Kenton |
-| ISBN | Book info, `Book` schema | Pending |
-| Publication date | Book info, `Book` schema | Pending |
-| Live purchase URL | `BUY THE BOOK` destination | Pending |
-| Official public contact email | Contact, footer | Pending |
-| Official social links | Footer, contact, `sameAs` | Pending |
-| Final media kit PDF | Media page download | Pending |
+| Standalone hi-res book cover | Cookbook page fidelity | Currently extracted from page 2 of the media kit PDF at 1819x2355. That is a page render, not source artwork |
+| Hi-res food photographs | Gallery at full-bleed | The four delivered files are screenshots containing a 1080x1440 image |
+| ISBN | Book info, `Book` schema | Renders as `Pending` |
+| Publication date | Book info, `Book` schema | Renders as `Pending` |
+| Live purchase URL | `BUY THE BOOK` destination | Falls back to `/cookbook` |
+| Official public contact email | Contact, footer | Nothing renders until supplied |
+| Official social links | Footer, contact, `sameAs` | Nothing renders until supplied |
+| Final media kit PDF | Media page download | A placeholder ships; `mediaKit.isFinal` stays `false`. The Aug 19 proof is explicitly not final |
+| Resend API key + recipient | Contact form delivery | Until both exist the endpoint returns 503 in production rather than accepting an inquiry it cannot deliver |
+| Turnstile keys | Spam protection | The widget and verification both no-op until configured |
 
-**Not blocked by any of the above:** routing, content model, copy, layout structure, form logic, accessibility scaffolding, SEO scaffolding, deployment pipeline. Start there.
-
----
+**Not blocked by any of the above:** routing, content model, copy, layout,
+form logic, accessibility, SEO, deployment.
 
 ## 15. Build order
 

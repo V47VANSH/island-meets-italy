@@ -11,6 +11,7 @@
 import Section from '@/components/layout/Section.astro';
 import Button from '@/components/ui/Button.astro';
 import Eyebrow from '@/components/ui/Eyebrow.astro';
+import Ornament from '@/components/brand/Ornament.astro';
 import { site } from '@/config/site';
 ---
 
@@ -46,9 +47,14 @@ import { site } from '@/config/site';
       </div>
     </div>
   </div>
+
+  {/* The page-foot ornament, used the way David uses it in the media kit. */}
+  <Ornament class="mediafeat__ornament" />
 </Section>
 
 <style>
+  .mediafeat__ornament { margin-block-start: clamp(3.5rem, 9vh, 6rem); }
+
   .mediafeat__grid {
     display: grid;
     grid-template-columns: 1fr;

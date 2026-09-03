@@ -1,6 +1,6 @@
 ---
 /**
- * Cookbook feature (§7.1) — ink, because the arancini is on a dark plate.
+ * Cookbook feature (§7.1) — ink, because this dish is on a dark plate.
  *
  * Enters from the right, the opposite side to the food feature above it, so
  * the eye crosses the meeting line again (§6.1).
@@ -27,8 +27,10 @@ const coverModules = import.meta.glob<{ default: ImageMetadata }>(
 const cover = Object.values(coverModules)[0]?.default ?? null;
 
 const dishes = await getCollection('dishes');
+// The dark-plate dish that is not leading the hero. Data decides, so swapping
+// the hero photograph again is a content edit, not a template one.
 const arancini =
-  dishes.find((d) => d.id === 'oxtail-arancini') ??
+  dishes.find((d) => d.id === 'panna-cotta') ??
   dishes.filter((d) => d.data.plateTone === 'dark' && !d.data.featured)[0];
 ---
 

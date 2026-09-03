@@ -109,10 +109,12 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    {/* Preload the display face only; the body face may swap (§13). */}
+    {/* Preload the display face only; the body face may swap (§13). Josefin
+        replaced Fraunces — leaving the old href here 404'd on every page and
+        cost a Lighthouse best-practices point. */}
     <link
       rel="preload"
-      href="/fonts/fraunces-latin.woff2"
+      href="/fonts/josefin-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin

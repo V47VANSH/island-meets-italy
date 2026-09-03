@@ -109,12 +109,13 @@ const description =
 
   .dish__caption { display: block; }
 
+  /* The double hairline from the cookbook cover, not a generic rule. */
   .dish__rule {
     display: block;
     width: 100%;
-    height: 1px;
+    height: 3px;
     margin-block: clamp(1.25rem, 3vh, 1.75rem) clamp(0.9rem, 2vh, 1.25rem);
-    background: var(--room-rule);
+    border-block: 1px solid var(--room-rule);
   }
 
   .dish__name {

@@ -2,39 +2,78 @@
  * Island Meets Italy — token layer.
  *
  * EVERY colour, font and rhythm value in the site is declared here and nowhere
- * else. No component contains a hex value or a font stack. When David supplies
- * the official brand specifications, this file is the only one that changes.
+ * else. No component contains a hex value or a font stack.
  *
- * §6.2 colour, §6.3 typography, §6.4 layout, §6.6 motion.
+ * These are the official brand specifications supplied by the client's
+ * designer (David), taken from the logo sheets and the Author & Book Media Kit.
+ * They replace the placeholders that shipped in earlier phases.
  */
 
 :root {
-  /* ── Surfaces ─────────────────────────────────────────────── §6.2 ── */
+  /* ── Surfaces ─────────────────────────────────────────────────────────
+     No black or off-white was specified. The cookbook cover is effectively
+     black with a fine grain, so --ink stays a warm near-black. */
   --ink:         #0C0C0B;  /* warm near-black — never pure #000 */
   --ink-raised:  #161614;  /* cards, raised blocks on dark */
   --cream:       #FBF8F3;  /* light rooms — paper, not clay */
   --cream-sunk:  #F2EDE4;  /* subtle blocks on cream */
 
-  /* ── Brand ────────────────────────────────────────────────────────── */
-  --gold:        #C8A551;  /* accent on dark ONLY — fails AA on cream */
-  --gold-deep:   #8C6D28;  /* accent/text on light — passes AA */
-  --emerald:     #0A5741;  /* deep — text on cream, surfaces */
-  --emerald-lit: #127A5C;  /* accent on dark */
+  /* ── Brand ────────────────────────────────────────────────────────────
+     The two flags: Jamaica's green and gold, Italy's green and red, held
+     together by gold. There is no emerald in this brand.
 
-  /* ── Text ─────────────────────────────────────────────────────────── */
+     Measured contrast, and the rule each colour is bound by:
+
+       colour              on --ink        on --cream
+       --gold       #C29B4E   7.54 AA        2.45  FAILS
+       --gold-light #E6C161  11.34 AA        1.63  FAILS
+       --gold-deep  #7F6127   3.39 large     5.44  AA
+       --maroon     #6D0000   1.54 FAILS    12.01  AA
+       --green      #009548   5.03 AA        3.68  large only
+       --red        #DE2128   4.06 large     4.55  AA
+
+     So: gold and light gold are INK ONLY. Maroon is CREAM ONLY. The room
+     tokens further down encode that, so a component cannot get it wrong. */
+  --gold:        #C29B4E;  /* primary. INK ONLY */
+  --gold-light:  #E6C161;  /* INK ONLY */
+  --gold-deep:   #7F6127;  /* David's "alternative where applicable" — the
+                              light-background gold. CREAM ONLY */
+  --maroon:      #6D0000;  /* CREAM ONLY */
+  --green:       #009548;
+  --red:         #DE2128;
+
+  /* Red and green never carry meaning on their own — roughly 8% of men cannot
+     reliably separate them. They only ever appear alongside text, position or
+     shape, as in the tagline device where the words say Island and Italian. */
+
+  /* ── Text ─────────────────────────────────────────────────────────────── */
   --text-on-dark:       #F3EFE8;
   --text-on-dark-mute:  #A8A399;
   --text-on-light:      #16150F;
   --text-on-light-mute: #5A5750;
 
-  /* ── Lines ────────────────────────────────────────────────────────── */
-  --rule-dark:  rgba(200, 165, 81, 0.28);
+  /* ── Lines ────────────────────────────────────────────────────────────── */
+  --rule-dark:  rgba(194, 155, 78, 0.30);
   --rule-light: rgba(22, 21, 15, 0.14);
 
-  /* ── Typography ───────────────────────────────────────────── §6.3 ── */
-  /* Placeholders until David supplies official typography. Swapping the
-     face is a one-line change here. Both are self-hosted (public/fonts). */
-  --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  /* ── Typography ───────────────────────────────────────────────────────
+     Josefin Sans is the brand face and the only supplied font that may be
+     served as a webfont (SIL OFL, fsType 0). Balkist Bold and Bandung
+     Signature are commercial desktop-licence faces and appear ONLY as outlined
+     vector paths inside the logo SVGs — there is deliberately no @font-face
+     for either.
+
+     Josefin is the DISPLAY face, not the body face, and that is David's own
+     structure rather than a compromise: page 5 of the media kit sets the
+     heading in Josefin and the body paragraphs in a neutral humanist sans with
+     a much larger x-height. Josefin has a small x-height and geometric,
+     near-identical round letterforms; at 16px over a six-line paragraph it
+     reads letter by letter instead of by word shape. Setting long copy in it
+     would be a misreading of the system, not fidelity to it.
+
+     Inter fills the body role: neutral, OFL, large x-height, and already in
+     the build. */
+  --font-display: 'Josefin Sans', 'Century Gothic', 'Futura', system-ui, sans-serif;
   --font-body:    'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
 
   /* Fluid type scale */
@@ -46,36 +85,26 @@
   --step-4:  clamp(2.44rem, 1.85rem + 2.9vw, 4.5rem);
   --step-5:  clamp(3.05rem, 2.1rem + 4.7vw, 6.5rem);
 
-  /* Utility treatment — eyebrows, labels, nav, buttons (§6.3) */
-  --tracking-utility: 0.14em;
+  /* David sets Josefin wide and light throughout the media kit — headings,
+     labels and the contents list are all generously tracked. */
+  --tracking-utility: 0.16em;
+  --tracking-display: 0.01em;
   --measure: 65ch;
-  --leading-body: 1.7;
+  --leading-body: 1.75;
 
-  /* ── Layout ───────────────────────────────────────────────── §6.4 ──
-     Mobile first. These are the phone values; the min-width: 900px block
-     below is where the desktop room opens up. */
+  /* ── Layout ───────────────────────────────────────────────────────────
+     Mobile first; the min-width: 900px block below opens it up. */
   --gutter:    1.75rem;
   --max-w:     1400px;
-  --section-y: clamp(4rem, 10vh, 6rem);
+  --section-y: clamp(4.5rem, 11vh, 6.5rem);
   --header-h:  4.25rem;
 
-  /* The meeting axis. On phones it lives in the left margin and doubles as a
-     scroll spine (§6.4); the gutter is wider than the axis so the spine sits
-     in a clear channel rather than underneath the text. On desktop it moves
-     to the page centre (§6.1). */
   --axis-x: 0.875rem;
-
-  /* One editorial portrait ratio for every photograph on the site. All four
-     approved originals are 3:4; 4:5 crops ~3% off the top and bottom, which
-     tightens the plate in frame without ever tending towards landscape (§5.2). */
-  --photo-portrait: 4 / 5;
-
-  /* Distance from the viewport edge to the content edge. Full-bleed sections
-     use this to line their content up with the constrained ones, which sit in
-     a centred --max-w container. */
   --edge-x: max(var(--gutter), calc((100vw - var(--max-w)) / 2 + var(--gutter)));
 
-  /* ── Motion ───────────────────────────────────────────────── §6.6 ── */
+  --photo-portrait: 4 / 5;
+
+  /* ── Motion ───────────────────────────────────────────────────────────── */
   --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-micro:  180ms;
   --dur-link:   220ms;
@@ -87,18 +116,16 @@
 @media (min-width: 900px) {
   :root {
     --gutter:    clamp(1.5rem, 5vw, 6rem);
-    --section-y: clamp(6rem, 14vh, 11rem);
+    --section-y: clamp(7rem, 15vh, 12rem);
     --header-h:  5rem;
     --axis-x:    50%;
   }
 }
 
 /**
- * Tailwind v4 theme bridge.
- *
- * `inline` makes the generated utilities reference the custom properties above
- * rather than copying their values, so a single edit in :root still propagates
- * everywhere. Utility classes are a convenience; the canonical names are above.
+ * Tailwind v4 theme bridge. `inline` makes the utilities reference the custom
+ * properties above rather than copying their values, so one edit still
+ * propagates. The canonical names are the ones above.
  */
 @theme inline {
   --color-ink:         var(--ink);
@@ -106,18 +133,16 @@
   --color-cream:       var(--cream);
   --color-cream-sunk:  var(--cream-sunk);
   --color-gold:        var(--gold);
+  --color-gold-light:  var(--gold-light);
   --color-gold-deep:   var(--gold-deep);
-  --color-emerald:     var(--emerald);
-  --color-emerald-lit: var(--emerald-lit);
+  --color-maroon:      var(--maroon);
+  --color-green:       var(--green);
+  --color-red:         var(--red);
 
   --color-on-dark:       var(--text-on-dark);
   --color-on-dark-mute:  var(--text-on-dark-mute);
   --color-on-light:      var(--text-on-light);
   --color-on-light-mute: var(--text-on-light-mute);
-
-  /* Fonts and easing keep their canonical :root names (§6.3) — mirroring them
-     here would produce a circular `var()` reference. Use them directly:
-     `font-family: var(--font-display)`. */
 
   --text-step--1: var(--step--1);
   --text-step-0:  var(--step-0);

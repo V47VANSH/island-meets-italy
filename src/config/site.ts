@@ -40,11 +40,12 @@ export const site = {
     priceValue: 29.99,
     currency: 'CAD',
     /**
-     * PENDING. Drop the artwork at src/assets/book/cover.jpg (or .png/.webp)
-     * and set this to true. Until then the cookbook renders a typographic
-     * cover block at the same aspect ratio, so the swap costs no layout.
+     * INTERIM. Extracted from page 2 of the Author & Book Media Kit PDF at the
+     * highest resolution that document contains (1819x2355). It is a page
+     * render, not the source artwork — a standalone high-resolution cover file
+     * should replace it before launch. Drop it at src/assets/book/cover.jpg.
      */
-    coverImage: null as string | null,
+    coverImage: 'cover.jpg' as string | null,
     isbn: null as string | null,              // PENDING
     publicationDate: null as string | null,   // PENDING
     purchaseUrl: null as string | null,       // PENDING — falls back to /cookbook

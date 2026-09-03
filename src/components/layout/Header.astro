@@ -13,6 +13,7 @@
  */
 import { site, buyUrl } from '@/config/site';
 import MobileNav from './MobileNav.astro';
+import Wordmark from '@/components/brand/Wordmark.astro';
 
 const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
 ---
@@ -20,7 +21,7 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
 <header class="header" data-header transition:persist>
   <div class="header__inner">
     <a class="header__brand" href="/" aria-label={`${site.name} — home`}>
-      <span class="header__wordmark">Island <em>Meets</em> Italy</span>
+      <Wordmark class="header__logo" />
     </a>
 
     <nav class="header__nav" aria-label="Primary">
@@ -113,25 +114,19 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
     }
   }
 
-  /* ── Wordmark ─────────────────────────────────────────────────────────
-     Placeholder until David supplies the official logo (§14). A real
-     typographic mark, so nothing on the page reads as missing. */
+  /* ── Wordmark ───────────────────────────────────────────────────────── */
   .header__brand {
+    display: flex;
+    align-items: center;
     flex: 0 0 auto;
     text-decoration: none;
-  }
-  .header__wordmark {
-    font-family: var(--font-display);
-    font-variation-settings: 'SOFT' 24, 'WONK' 0;
-    font-size: clamp(0.75rem, 0.5rem + 1.4vw, 1.13rem);
-    letter-spacing: 0.03em;
-    line-height: 1;
-    color: var(--header-text);
-    white-space: nowrap;
-  }
-  .header__wordmark em {
-    font-style: normal;
+    /* Gold on ink, gold-deep once the bar inverts over a cream room. */
     color: var(--header-accent);
+  }
+  /* :global — the class lands on the Wordmark component's own span, which
+     carries that component's scope id, not this one's. */
+  .header__brand :global(.wordmark) {
+    width: clamp(7.5rem, 16vw, 11rem);
   }
 
   /* ── Links ──────────────────────────────────────────────────────────── */

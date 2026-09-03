@@ -122,9 +122,12 @@ const EXPR = `
     const r = ratio(fg, bg);
     const need = large ? 3 : 4.5;
 
-    // The specific trap: --gold as text on a light surface.
-    const isGold = Math.abs(fg.r - 200) < 12 && Math.abs(fg.g - 165) < 12 && Math.abs(fg.b - 81) < 14;
+    // The two prohibitions in the brand palette: gold on light, maroon on dark.
+    const near = (c, r, g, b, t) => Math.abs(c.r-r)<t && Math.abs(c.g-g)<t && Math.abs(c.b-b)<t;
+    const isGold = near(fg, 194, 155, 78, 14) || near(fg, 230, 193, 97, 14);
+    const isMaroon = near(fg, 109, 0, 0, 14);
     const lightBg = lum(bg) > 0.4;
+    const darkBg = lum(bg) <= 0.4;
 
     out.push({
       sel: el.tagName.toLowerCase() + (el.className && typeof el.className === 'string'
@@ -134,6 +137,7 @@ const EXPR = `
       px: Math.round(px), large, ratio: Math.round(r * 100) / 100, need,
       pass: r >= need,
       goldOnLight: isGold && lightBg,
+      maroonOnDark: isMaroon && darkBg,
     });
   }
   return out;
@@ -148,6 +152,7 @@ const rows = JSON.parse(res.result.value);
 
 const fails = rows.filter((r) => !r.pass);
 const gold = rows.filter((r) => r.goldOnLight);
+const maroon = rows.filter((r) => r.maroonOnDark);
 
 console.log(`\nContrast audit — ${url} @ ${w}px`);
 console.log(`  ${rows.length} text elements measured`);
@@ -157,6 +162,14 @@ if (gold.length) {
   for (const g of gold) console.log(`    ${g.sel}  "${g.text}"  ${g.fg} on ${g.bg}`);
 } else {
   console.log('  gold-on-light: none');
+}
+
+if (maroon.length) {
+  console.log(`
+  MAROON ON DARK (§6.2 prohibition) — ${maroon.length}`);
+  for (const m of maroon) console.log(`    ${m.sel}  "${m.text}"  ${m.fg} on ${m.bg}`);
+} else {
+  console.log('  maroon-on-dark: none');
 }
 
 if (fails.length) {
@@ -176,4 +189,4 @@ for (const r of worst) console.log(`    ${r.ratio}:1  ${r.px}px  ${r.sel}  "${r.
 
 ws.close();
 chrome.kill();
-process.exit(fails.length + gold.length === 0 ? 0 : 1);
+process.exit(fails.length + gold.length + maroon.length === 0 ? 0 : 1);
