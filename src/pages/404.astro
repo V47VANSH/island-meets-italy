@@ -54,7 +54,8 @@ import { site } from '@/config/site';
     text-align: center;
   }
 
-  .nf__ornament { margin-block-end: clamp(2rem, 5vh, 3rem); }
+  /* :global — lands on <Ornament>'s own root, which carries its scope id. */
+  .nf__wrap :global(.nf__ornament) { margin-block-end: clamp(2rem, 5vh, 3rem); }
 
   .nf__code { color: var(--room-accent); }
 

@@ -157,6 +157,26 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   --room-focus: var(--gold-deep);
 }
 
+/* Two rooms of the same colour meeting pay the section rhythm twice, with no
+   change of ground to account for the second half: on the gallery that put
+   258px of unbroken cream between two dishes, and on About the same between
+   the career and story blocks. A transition only costs a full measure when
+   the room actually changes.
+
+   Skipped when the section above ran flush, because then there is no doubled
+   measure to collapse — the home hero ends hard on the fold, and taking the
+   next room's opening space away would butt its heading against the
+   photograph.
+
+   Both compounds are qualified with .section so this reliably outranks
+   Section's own `padding-block`, which Astro emits at the same specificity as
+   a bare two-class selector; on a tie the winner came down to which
+   stylesheet a given page happened to order first. */
+.section.room-ink:not(.section--flush-bottom):not(.section--flush-both) + .section.room-ink,
+.section.room-cream:not(.section--flush-bottom):not(.section--flush-both) + .section.room-cream {
+  padding-block-start: 0;
+}
+
 /* ── Brand devices ──────────────────────────────────────────────────────
    Lifted from the cookbook cover and the media kit, not invented. */
 

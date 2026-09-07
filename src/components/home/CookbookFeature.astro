@@ -155,27 +155,34 @@ const arancini =
 
   @media (min-width: 900px) {
     .cookbook__grid {
-      /* The first column ends exactly on the meeting line, so the copy stops
-         at the axis instead of spilling across it. */
-      grid-template-columns: calc(var(--axis-x) - var(--edge-x)) 1fr;
+      /* The column boundary IS the meeting line. --axis-x resolves against
+         this grid's own content box, so the page inset has to live on the
+         copy rather than on the grid — with padding-inline-start here, 50%
+         landed half a gutter short of the line and the copy stopped in
+         mid-air. */
+      grid-template-columns: var(--axis-x) 1fr;
       align-items: center;
-      padding-inline-start: var(--edge-x);
+      padding-inline: 0;
+      /* The mobile stacking gap is a ROW gap; left in place here it becomes a
+         column gap and pushes the second column off the axis by its width. */
+      column-gap: 0;
     }
 
     .cookbook__copy {
       order: 1;
-      padding-inline: 0 clamp(1.75rem, 4vw, 3.5rem);
-      max-width: 36rem;
-      justify-self: end;
+      padding-inline: var(--edge-x) clamp(1.75rem, 4vw, 3.5rem);
     }
 
     .cookbook__media {
       order: 2;
       gap: 0;
       align-items: center;
-      /* Bleeds off the right edge of the section (§7.1). */
-      justify-self: end;
-      width: min(100%, 42vw);
+      /* Runs from the meeting line out to the right edge of the section,
+         the same offset every other room takes off the axis. `42vw` with
+         justify-self:end sized it off nothing in particular and left the
+         block floating a gutter and a half clear of the line. */
+      justify-self: stretch;
+      margin-inline-start: clamp(1.75rem, 4vw, 3.5rem);
     }
 
     .cookbook__actions > :global(.btn) { flex: 0 0 auto; }
@@ -201,11 +208,15 @@ const arancini =
     [data-has-cover] .cookbook__coverimg {
       width: min(100%, 28rem);
     }
+    /* The secondary photograph, offset and overlapping (§7.1). At 58% it was
+       wider than the gap between the cover's right edge and the page edge, so
+       the cover — which sits above it — hid all but a 157px strip and the
+       overlap read as a clipping accident rather than a composition. */
     [data-has-cover] .cookbook__dish {
       grid-area: 1 / 1;
       z-index: 1;
       justify-self: end;
-      width: 58%;
+      width: 42%;
       align-self: end;
       transform: translateY(18%);
     }

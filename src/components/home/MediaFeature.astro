@@ -53,7 +53,12 @@ import { site } from '@/config/site';
 </Section>
 
 <style>
-  .mediafeat__ornament { margin-block-start: clamp(3.5rem, 9vh, 6rem); }
+  /* :global — both of these classes are handed to child components and land
+     on those components' own roots, carrying their scope ids rather than this
+     file's. Each is reached through an element this file actually renders. */
+  .mediafeat__grid + :global(.mediafeat__ornament) {
+    margin-block-start: clamp(3.5rem, 9vh, 6rem);
+  }
 
   .mediafeat__grid {
     display: grid;
@@ -62,7 +67,7 @@ import { site } from '@/config/site';
   }
 
   /* The eyebrow repeats the heading string, so it is decorative here. */
-  .mediafeat__eyebrow { display: none; }
+  .mediafeat__headingwrap :global(.mediafeat__eyebrow) { display: none; }
 
   .mediafeat__title {
     font-size: var(--step-3);

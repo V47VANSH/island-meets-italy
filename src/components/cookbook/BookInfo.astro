@@ -103,4 +103,15 @@ const rows: { label: string; value: string; pending?: boolean }[] = [
       align-items: baseline;
     }
   }
+
+  @media (min-width: 900px) {
+    /* Stop on the meeting line, the same place every other block that sits
+       left of the axis stops. At a flat 46rem the hairline rules ran past the
+       line and ended a hundred-odd pixels beyond it, which read as the table
+       having been cut off rather than placed. The longest value —
+       "Island Meets Italy Inc. Publishing" — still sets on one line. */
+    .bookinfo__wrap {
+      max-width: calc(50% - clamp(1.75rem, 4vw, 3.5rem));
+    }
+  }
 </style>

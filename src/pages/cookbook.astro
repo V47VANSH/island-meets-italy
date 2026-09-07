@@ -141,7 +141,15 @@ const bookSchema = {
     padding-block-start: var(--header-h);
   }
 
-  .chero__cover { width: min(68%, 17rem); }
+  /* :global — lands on <BookCover>'s own root and its scope id. */
+  /* Centred, like the portrait on the home page. Left-aligned, a 68%-wide
+     picture sat hard against the gutter with a third of the screen empty
+     beside it, which read as a layout that had slipped rather than a
+     deliberate offset. Mobile has no meeting line to hang it off. */
+  .chero__grid :global(.chero__cover) {
+    width: min(68%, 17rem);
+    margin-inline: auto;
+  }
 
   .chero__title {
     font-size: var(--step-4);
@@ -234,11 +242,17 @@ const bookSchema = {
       align-items: center;
       gap: 0;
     }
-    .chero__cover {
+    /* margin, not padding: these classes land on a child component's root,
+       and that root sizes its artwork against its own content box. Padding
+       here shrank the picture inside its frame — on the book cover, whose
+       root carries the aspect ratio and the gold edge glow, it cropped the
+       artwork and drew the glow a gutter wider than the cover. */
+    .chero__grid :global(.chero__cover) {
       grid-column: 1;
       justify-self: end;
+      margin-inline: 0;
       width: min(100%, 22rem);
-      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+      margin-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
     .chero__copy {
       grid-column: 2;

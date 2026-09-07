@@ -47,7 +47,10 @@ const { eyebrow, title, standfirst, tone = 'ink', id = 'page-title' } = Astro.pr
     gap: clamp(2.5rem, 6vh, 4rem) 0;
   }
 
-  .pageintro__eyebrow { margin-block-end: 1.25rem; }
+  /* :global — lands on <Eyebrow>'s own root, which carries its scope id. */
+  .pageintro__headingwrap :global(.pageintro__eyebrow) {
+    margin-block-end: 1.25rem;
+  }
 
   .pageintro__heading {
     font-size: var(--step-4);

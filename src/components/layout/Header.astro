@@ -93,6 +93,17 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
     --header-rule: var(--rule-light);
   }
 
+  /* While the mobile overlay is open the bar sits on the panel's ink, not on
+     the room underneath it — so the cream inversion has to be undone or the
+     wordmark and BUY THE BOOK would be near-black on near-black. */
+  .header:has(.mobile-nav__panel[data-open]) {
+    --header-text: var(--text-on-dark);
+    --header-mute: var(--text-on-dark-mute);
+    --header-accent: var(--gold);
+    --header-bg: transparent;
+    --header-rule: transparent;
+  }
+
   .header__inner {
     display: flex;
     align-items: center;
@@ -102,23 +113,30 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
        a little tighter than the page gutter below 600px to make room. */
     gap: 0.4rem;
     height: 100%;
-    max-width: var(--max-w);
-    margin-inline: auto;
+    /* Same edge as every section, so the wordmark starts exactly where the
+       page content below it does. */
     padding-inline: 1rem;
   }
 
   @media (min-width: 600px) {
     .header__inner {
       gap: clamp(1rem, 3vw, 2.5rem);
-      padding-inline: var(--gutter);
+      padding-inline: var(--edge-x);
     }
   }
 
   /* ── Wordmark ───────────────────────────────────────────────────────── */
   .header__brand {
+    /* Above the mobile overlay — see the note on .mobile-nav__trigger. */
+    position: relative;
+    z-index: 46;
     display: flex;
     align-items: center;
     flex: 0 0 auto;
+    /* The wordmark artwork is only ~21px tall, which left the home link as a
+       21px tap target. The bar is already centring this, so a minimum height
+       enlarges the hit area without moving the mark. */
+    min-height: 2.75rem;
     text-decoration: none;
     /* Gold on ink, gold-deep once the bar inverts over a cream room. */
     color: var(--header-accent);
@@ -189,6 +207,11 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
   }
 
   .header__buy {
+    /* BUY THE BOOK deliberately stays in the bar rather than moving into the
+       menu, so the primary action is never hidden behind it (MobileNav §). It
+       has to outrank the overlay for that to actually hold. */
+    position: relative;
+    z-index: 46;
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;

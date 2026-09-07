@@ -172,8 +172,14 @@ const description =
     padding-block-start: var(--header-h);
   }
 
-  .career__portrait {
+  /* :global — lands on <ChefPortrait>'s own <figure> and its scope id. */
+  /* Centred, like the portrait on the home page. Left-aligned, a 68%-wide
+     picture sat hard against the gutter with a third of the screen empty
+     beside it, which read as a layout that had slipped rather than a
+     deliberate offset. Mobile has no meeting line to hang it off. */
+  .career__grid :global(.career__portrait) {
     width: min(70%, 18rem);
+    margin-inline: auto;
   }
 
   .career__title {
@@ -267,11 +273,17 @@ const description =
       gap: 0;
     }
 
-    .career__portrait {
+    /* margin, not padding: these classes land on a child component's root,
+       and that root sizes its artwork against its own content box. Padding
+       here shrank the picture inside its frame — on the book cover, whose
+       root carries the aspect ratio and the gold edge glow, it cropped the
+       artwork and drew the glow a gutter wider than the cover. */
+    .career__grid :global(.career__portrait) {
       grid-column: 1;
       justify-self: end;
+      margin-inline: 0;
       width: min(100%, 24rem);
-      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+      margin-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
 
     .career__copy {

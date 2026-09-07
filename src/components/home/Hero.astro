@@ -43,7 +43,7 @@ const heroDish =
             pull the 1080 variant, and this is a shallow-depth-of-field frame
             where 800px across a 360px element is already past visible. It is
             the LCP element, so the bytes matter more than the last 20%. */}
-        sizes="(min-width: 900px) 34rem, 800px"
+        sizes="(min-width: 900px) 46vw, 800px"
         loading="eager"
         fetchpriority="high"
         class="hero__image"
@@ -142,7 +142,9 @@ const heroDish =
   .hero__figure { margin: 0 calc(var(--gutter) * -1); }
 
   .hero__image {
-    width: 100vw;
+    /* 100% of the figure, which the negative margin has already pushed out to
+       both edges. `100vw` would have been a scrollbar wider than the page. */
+    width: 100%;
     max-width: none;
     height: 55svh;
     object-fit: cover;
@@ -208,7 +210,13 @@ const heroDish =
       padding-inline: var(--edge-x);
     }
     .hero__wordmark :global(.wordmark) {
-      width: min(100%, 56rem);
+      /* The 82vw term is what keeps the nudge on the page. translateX is a
+         percentage of the lockup's OWN width — the right basis, because
+         "meets" sits at a fixed fraction along it — but it moves the mark
+         without moving its box, so between 900 and about 1050px the full-
+         width lockup was shifted 60px off the left edge and the "I" of
+         Island was being clipped away by the body's overflow-x: clip. */
+      width: min(100%, 56rem, 82vw);
       transform: translateX(-7.6%);
     }
 
@@ -227,27 +235,36 @@ const heroDish =
     .hero__intro { max-width: 46ch; }
     .hero__actions > :global(.btn) { flex: 0 0 auto; }
 
+    /* §7.1 asks for the photograph at roughly 45% of the viewport, portrait,
+       full-bleed to the right edge. Sizing it by `height: 54svh` plus a 4/5
+       aspect ratio did not deliver that: the second row is only what is left
+       under a full-width wordmark, so the picture resolved to ~22vw and sat
+       as a small tile in the bottom-right corner with the column empty around
+       it. It fills its column instead — left edge off the meeting line, right
+       edge off the page, bottom on the fold. */
     .hero__figure {
       grid-column: 2;
       grid-row: 2;
-      justify-self: end;
-      align-self: end;
+      position: relative;
       margin: 0;
       padding: 0;
-      /* Height is bound to the viewport, not the grid row: the row has no
-         definite height, so `height: 100%` would resolve to auto, the
-         aspect-ratio would derive height from max-width, and the row would
-         grow to fit it — inflating the hero past one viewport. */
-      height: clamp(20rem, 54svh, 40rem);
-      aspect-ratio: var(--photo-portrait);
-      max-width: 100%;
+      /* Clears the meeting line by the same offset every other room uses. */
+      margin-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+      /* The item stretches to its grid area; min-height keeps the picture's
+         intrinsic height from pushing that area past the fold. */
+      min-height: 0;
+      overflow: hidden;
     }
 
     .hero__image {
+      /* Out of flow, so the figure's height comes from the grid row and never
+         from the image — the circular sizing that inflated this hero before. */
+      position: absolute;
+      inset: 0;
       width: 100%;
-      max-width: 100%;
+      max-width: none;
       height: 100%;
-      object-position: 52% 68%;
+      object-position: 52% 62%;
     }
   }
 </style>

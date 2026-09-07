@@ -149,6 +149,12 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
 
 <style>
   .mobile-nav__trigger {
+    /* Above .mobile-nav__panel (z-index 45). The panel is rendered inside the
+       header, so its z-index competes with the bar's own children rather than
+       with the header as a whole: without this the overlay covered its own
+       close button and the menu could only be dismissed with Escape. */
+    position: relative;
+    z-index: 46;
     display: inline-flex;
     align-items: center;
     justify-content: center;

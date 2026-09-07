@@ -62,7 +62,10 @@ import { site } from '@/config/site';
     gap: clamp(1.5rem, 4vh, 2.5rem);
   }
 
-  .chef__portrait {
+  /* :global — the class is handed to <ChefPortrait>, so it lands on that
+     component's own <figure>, which carries ITS scope id and not this one's.
+     Reached through .chef__grid, an element this file does own. */
+  .chef__grid :global(.chef__portrait) {
     /* Slightly inset, so the feathered edge has cream to dissolve into
        instead of running off the side of the screen. */
     width: min(74%, 20rem);
@@ -113,12 +116,17 @@ import { site } from '@/config/site';
       gap: 0;
     }
 
-    .chef__portrait {
+    /* margin, not padding: these classes land on a child component's root,
+       and that root sizes its artwork against its own content box. Padding
+       here shrank the picture inside its frame — on the book cover, whose
+       root carries the aspect ratio and the gold edge glow, it cropped the
+       artwork and drew the glow a gutter wider than the cover. */
+    .chef__grid :global(.chef__portrait) {
       grid-column: 1;
       justify-self: end;
       width: min(100%, 26rem);
       margin-inline: 0;
-      padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
+      margin-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
 
     .chef__copy {

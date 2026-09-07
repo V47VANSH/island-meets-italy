@@ -126,14 +126,30 @@ const lead =
     .food__grid {
       /* The photograph bleeds off the left edge and runs past the meeting
          line; the list sits in the remaining column, right of it. */
-      grid-template-columns: 62vw minmax(17rem, 1fr);
-      gap: clamp(2rem, 4vw, 4.5rem);
-      align-items: center;
+      /* minmax(0, 1fr), not minmax(17rem, 1fr): at 900-1000px the 17rem floor
+         plus the 62vw picture and the gap came to more than the row could
+         hold, so the grid overflowed the page by a few pixels. */
+      grid-template-columns: 62vw minmax(0, 1fr);
+      gap: clamp(1.5rem, 3.5vw, 4.5rem);
+      /* Top-aligned, not centred: at 62vw the picture is taller than the
+         viewport, and centring left the heading and list stranded in the
+         middle of the column with a screen of empty cream above them. */
+      align-items: start;
       padding-inline-end: var(--edge-x);
     }
 
-    .food__meta { padding-inline: 0; }
+    .food__meta {
+      padding-inline: 0;
+      /* Drops the eyebrow just below the top edge of the photograph, so the
+         two blocks read as one spread rather than two flush-top columns. */
+      padding-block-start: clamp(1.5rem, 5vh, 3.5rem);
+    }
 
-    .food__image { aspect-ratio: var(--photo-portrait); }
+    /* Square rather than 4:5 here. At 62vw a portrait frame resolved to
+       1116px — taller than any laptop viewport, so the signature dish could
+       never be seen whole, and the source is only 1080px wide so it was being
+       upscaled as well. Square keeps the plate intact and the section within
+       one comfortable scroll. */
+    .food__image { aspect-ratio: 1 / 1; }
   }
 </style>

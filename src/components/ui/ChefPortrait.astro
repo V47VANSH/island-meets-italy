@@ -83,18 +83,26 @@ const alt = `${site.chef.name}, photographed straight on against a soft cream cu
        the mask to fade through rather than cutting the head off. */
     aspect-ratio: 3 / 4;
     object-position: 50% 30%;
-    -webkit-mask-image: radial-gradient(
-      ellipse 76% 70% at 50% 42%,
-      #000 46%,
-      rgba(0, 0, 0, 0.75) 68%,
-      transparent 100%
-    );
-    mask-image: radial-gradient(
-      ellipse 76% 70% at 50% 42%,
-      #000 46%,
-      rgba(0, 0, 0, 0.75) 68%,
-      transparent 100%
-    );
+    /* Four soft edges, the same technique as the ink treatment below.
+       The radial this replaces had a 76% horizontal radius measured from the
+       centre, so it was still ~75% opaque where the picture actually ended:
+       the corners dimmed slightly and the left and right edges stayed as hard
+       vertical cuts. A radius small enough to reach transparent at the edge
+       would have turned the frame into an oval medallion, which §6.7 rules
+       out as a second signature shape. Fading each edge in turn dissolves the
+       rectangle without introducing one. */
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 13%),
+      linear-gradient(to top, transparent 0%, #000 13%),
+      linear-gradient(to right, transparent 0%, #000 15%),
+      linear-gradient(to left, transparent 0%, #000 15%);
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 13%),
+      linear-gradient(to top, transparent 0%, #000 13%),
+      linear-gradient(to right, transparent 0%, #000 15%),
+      linear-gradient(to left, transparent 0%, #000 15%);
+    -webkit-mask-composite: source-in, source-in, source-in;
+    mask-composite: intersect, intersect, intersect;
   }
 
   /* ── Ink room: let the shoulders go ────────────────────────────────── */

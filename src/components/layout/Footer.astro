@@ -82,7 +82,9 @@ const footerLinks = [
 <style>
   .footer__grid {
     display: grid;
-    gap: clamp(2.5rem, 6vw, 5rem);
+    /* Row gap only. A column gap here would sit between the two halves and
+       push the links column off the meeting line, which is the boundary. */
+    gap: clamp(2.5rem, 6vw, 5rem) 0;
     grid-template-columns: 1fr;
   }
 
@@ -92,13 +94,13 @@ const footerLinks = [
       grid-template-columns: 1fr 1fr;
       align-items: start;
     }
-    .footer__links { padding-inline-start: clamp(2rem, 5vw, 5rem); }
+    /* The same offset off the axis that every other room uses. */
+    .footer__links { padding-inline-start: clamp(1.75rem, 4vw, 3.5rem); }
   }
 
   .footer__wordmark { color: var(--room-accent); }
   .footer__wordmark :global(.wordmark) { width: min(100%, 20rem); }
 
-  .footer__taglinewrap { margin-block-start: 1.1rem; }
   .footer__identity :global(.footer__tagline) {
     margin-block-start: 1.1rem;
     font-size: var(--step-1);

@@ -92,7 +92,6 @@ const description =
   }
 
   .dish__img {
-    width: 100vw;
     /* global.css caps every image at max-width:100%, which is the container's
        334px here — that silently clipped the bleed to the content width. The
        hero escapes it because its negative margin is on the figure; this one
@@ -100,8 +99,11 @@ const description =
     max-width: none;
     /* Out to both edges: the Section's inner padding is cancelled here so a
        dish fills the screen the way §7.4 asks, without the page scrolling
-       sideways (body has overflow-x: clip). */
-    margin-inline: calc(var(--gutter) * -1);
+       sideways (body has overflow-x: clip). Derived from the padding it is
+       cancelling rather than from 100vw, which on Windows is a scrollbar
+       wider than the page and bled 15px off the right of every dish. */
+    width: calc(100% + var(--edge-x) * 2);
+    margin-inline: calc(var(--edge-x) * -1);
     aspect-ratio: 3 / 4;
     object-fit: cover;
     object-position: center;
@@ -130,32 +132,50 @@ const description =
   /* ── Desktop: asymmetric editorial grid ─────────────────────────────── */
 
   @media (min-width: 900px) {
+    /* Every dish spans the full column and splits it: the photograph on its
+       own side, the name in the facing column sitting on the picture's bottom
+       edge. Previously only the lead did this and the rest were bare figures
+       floated left or right — an `inset` dish at 38% left a 60%-wide, 600px-
+       tall block of empty room beside it with nothing in it, which read as a
+       layout that had failed rather than as space. The asymmetry §7.4 asks
+       for now comes from how far the split moves, not from a void. */
+    .dish {
+      display: grid;
+      align-items: end;
+      column-gap: clamp(1.75rem, 4vw, 3.5rem);
+      width: 100%;
+    }
+
     .dish__img {
       width: 100%;
       max-width: 100%;
       margin-inline: 0;
     }
 
-    /* Deliberately uneven widths. The branzino leads. */
-    .dish[data-scale='lead'] { width: 72%; }
-    .dish[data-scale='wide'] { width: 58%; }
-    .dish[data-scale='medium'] { width: 46%; }
-    .dish[data-scale='inset'] { width: 38%; }
+    /* Deliberately uneven splits. The branzino leads. */
+    .dish[data-scale='lead'] { --dish-w: 66%; }
+    .dish[data-scale='wide'] { --dish-w: 58%; }
+    .dish[data-scale='medium'] { --dish-w: 50%; }
+    .dish[data-scale='inset'] { --dish-w: 44%; }
 
-    .dish[data-side='right'] { margin-inline-start: auto; }
+    .dish[data-side='left'] { grid-template-columns: var(--dish-w) minmax(0, 1fr); }
+    .dish[data-side='right'] { grid-template-columns: minmax(0, 1fr) var(--dish-w); }
 
-    /* The lead dish gets its caption alongside rather than beneath, so the
-       signature dish reads differently from the rest. */
-    .dish[data-scale='lead'] {
-      display: grid;
-      grid-template-columns: 1fr minmax(12rem, 0.32fr);
-      align-items: end;
-      gap: clamp(1.5rem, 3vw, 2.5rem);
-      width: 88%;
+    /* Entering from the right: picture second, caption first and set to the
+       axis, so the two sides of the page keep answering each other (§6.1). */
+    .dish[data-side='right'] .dish__img { grid-column: 2; grid-row: 1; }
+    .dish[data-side='right'] .dish__caption {
+      grid-column: 1;
+      grid-row: 1;
+      text-align: right;
     }
-    .dish[data-scale='lead'] .dish__rule { margin-block-start: 0; }
-    .dish[data-scale='lead'] .dish__name { font-size: var(--step-1); }
 
-    .dish[data-scale='inset'] .dish__name { font-size: var(--step-1); }
+    .dish__caption { align-self: end; }
+    .dish__rule { margin-block-start: 0; }
+    .dish__name { font-size: var(--step-2); }
+
+    /* The signature dish still reads differently: it is the widest split and
+       the only name set at display scale. */
+    .dish[data-scale='lead'] .dish__name { font-size: var(--step-3); }
   }
 </style>

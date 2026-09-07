@@ -92,9 +92,13 @@ const {
     position: relative;
     z-index: 2; /* above the meeting line, which sits at 1 */
     width: 100%;
-    max-width: var(--max-w);
-    margin-inline: auto;
-    padding-inline: var(--gutter);
+    /* --edge-x, not `max-width + auto margins + gutter`. The two produce the
+       same content width, but they are measured from different origins: the
+       centring uses the layout viewport while --edge-x uses 100vw, which on
+       Windows includes the scrollbar. A bleed section's children pad with
+       --edge-x, so mixing the two left every contained page sitting half a
+       scrollbar off the full-bleed ones. One token, one edge, everywhere. */
+    padding-inline: var(--edge-x);
   }
 
   .section__bleed {
