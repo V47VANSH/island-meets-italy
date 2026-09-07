@@ -262,7 +262,10 @@ const bookSchema = {
     .found__grid,
     .homek__grid {
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the taller column. Flush-top, a 106px heading beside
+         a 306px body left a screen-deep void under the heading before the
+         section's own padding even began. */
+      align-items: center;
     }
 
     /* Alternating entry sides down the page (§6.1). */
@@ -277,19 +280,24 @@ const bookSchema = {
       padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
     }
 
+    /* Heading left of the line, body right of it — the same way round as
+       every other room. Mirrored, the eye met four lines of copy before it
+       met the heading that framed them, and the copy had to be set flush
+       right to hold the axis, which leaves prose with a ragged left edge and
+       no reliable line start. The axis is still crossed; the reading order
+       is no longer inverted to do it. */
     .homek__headingwrap {
-      grid-column: 2;
-      grid-row: 1;
-      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
-    }
-    .homek__body {
       grid-column: 1;
       grid-row: 1;
       justify-self: end;
       text-align: right;
       padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
-    .homek__body :global(.prose) { margin-inline-start: auto; }
+    .homek__body {
+      grid-column: 2;
+      grid-row: 1;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
 
     /* The sticky bar is a small-screen affordance only (§7.3). */
     .stickybuy { display: none; }

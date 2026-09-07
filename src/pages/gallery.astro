@@ -139,43 +139,78 @@ const description =
        tall block of empty room beside it with nothing in it, which read as a
        layout that had failed rather than as space. The asymmetry §7.4 asks
        for now comes from how far the split moves, not from a void. */
+    /* A dish is bounded by HEIGHT, not driven by width. These are 3:4
+       portrait frames, so sizing them from the column made width and height
+       rise together: pushed to 62% of a 1920 screen the lead photograph came
+       out 1130x1507 — one and a half screens tall — and the page ran to seven
+       viewport-heights for four pictures. You could never see a dish whole.
+
+       A portrait photograph on a wide monitor cannot be both broad and wholly
+       visible, and §5.2 rules out cropping these frames wide. Being wholly
+       visible wins on the one page whose whole job is the food, so the margin
+       either side is the honest consequence — and it is put to work: the
+       photograph is anchored to the page edge and the name to the meeting
+       line, so both edges of the composition are disciplined and the slack
+       falls in the middle, between picture and caption, where a gap belongs.
+
+       The column boundary is the meeting line, as in every other room. */
     .dish {
       display: grid;
+      grid-template-columns: 1fr 1fr;
       align-items: end;
-      column-gap: clamp(1.75rem, 4vw, 3.5rem);
       width: 100%;
     }
 
     .dish__img {
-      width: 100%;
+      /* Fills its half of the page until the height cap bites, then holds. */
+      width: min(100%, calc(var(--dish-h) * 3 / 4));
       max-width: 100%;
       margin-inline: 0;
     }
 
-    /* Deliberately uneven splits. The branzino leads. */
-    .dish[data-scale='lead'] { --dish-w: 66%; }
-    .dish[data-scale='wide'] { --dish-w: 58%; }
-    .dish[data-scale='medium'] { --dish-w: 50%; }
-    .dish[data-scale='inset'] { --dish-w: 44%; }
+    /* Deliberately uneven, and every one of them fits on the screen. */
+    .dish[data-scale='lead'] { --dish-h: min(86svh, 60rem); }
+    .dish[data-scale='wide'] { --dish-h: min(78svh, 54rem); }
+    .dish[data-scale='medium'] { --dish-h: min(72svh, 48rem); }
+    .dish[data-scale='inset'] { --dish-h: min(66svh, 44rem); }
 
-    .dish[data-side='left'] { grid-template-columns: var(--dish-w) minmax(0, 1fr); }
-    .dish[data-side='right'] { grid-template-columns: minmax(0, 1fr) var(--dish-w); }
+    .dish__caption {
+      align-self: end;
+      max-width: 26rem;
+    }
 
-    /* Entering from the right: picture second, caption first and set to the
-       axis, so the two sides of the page keep answering each other (§6.1). */
-    .dish[data-side='right'] .dish__img { grid-column: 2; grid-row: 1; }
+    /* Entering from the left: picture against the left page edge, name across
+       the line. Entering from the right, the mirror of it (§6.1). */
+    .dish[data-side='left'] .dish__img {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: start;
+    }
+    .dish[data-side='left'] .dish__caption {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: start;
+      margin-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
+
+    .dish[data-side='right'] .dish__img {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+    }
     .dish[data-side='right'] .dish__caption {
       grid-column: 1;
       grid-row: 1;
+      justify-self: end;
       text-align: right;
+      margin-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
 
-    .dish__caption { align-self: end; }
     .dish__rule { margin-block-start: 0; }
     .dish__name { font-size: var(--step-2); }
 
-    /* The signature dish still reads differently: it is the widest split and
-       the only name set at display scale. */
+    /* The signature dish still reads differently: the largest frame and the
+       only name set at display scale. */
     .dish[data-scale='lead'] .dish__name { font-size: var(--step-3); }
   }
 </style>

@@ -60,7 +60,10 @@ import Button from '@/components/ui/Button.astro';
     .brand__grid {
       /* The column boundary is the meeting line. */
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the taller column. Flush-top, a 106px heading beside
+         a 306px body left a screen-deep void under the heading before the
+         section's own padding even began. */
+      align-items: center;
     }
 
     .brand__headingwrap {
@@ -73,9 +76,6 @@ import Button from '@/components/ui/Button.astro';
     .brand__body {
       grid-column: 2;
       padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
-      /* Drops the paragraphs below the heading's first line, so the two
-         blocks read as a conversation across the axis rather than a table. */
-      padding-block-start: clamp(0.5rem, 2vh, 1.5rem);
     }
 
     .brand__body :global(.prose) { color: var(--room-mute); }

@@ -42,6 +42,9 @@ const isExternal = Boolean(href && /^https?:\/\//.test(href));
     align-items: center;
     justify-content: center;
     min-height: 3rem;
+    /* The label wraps rather than overflowing. DOWNLOAD AUTHOR & BOOK MEDIA
+       KIT is wider than the media page's copy column at 900px. */
+    max-width: 100%;
     padding: 0.9rem 1.75rem;
     border: 1px solid transparent;
     background: transparent;

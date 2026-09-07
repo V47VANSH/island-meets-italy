@@ -73,7 +73,10 @@ const { eyebrow, title, standfirst, tone = 'ink', id = 'page-title' } = Astro.pr
     .pageintro__grid {
       /* The column boundary is the meeting line. */
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the taller column. Flush-top, a 106px heading beside
+         a 306px body left a screen-deep void under the heading before the
+         section's own padding even began. */
+      align-items: center;
     }
 
     .pageintro__headingwrap {
@@ -86,7 +89,6 @@ const { eyebrow, title, standfirst, tone = 'ink', id = 'page-title' } = Astro.pr
     .pageintro__body {
       grid-column: 2;
       padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
-      padding-block-start: clamp(0.5rem, 2vh, 1.5rem);
     }
   }
 </style>

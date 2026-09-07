@@ -86,7 +86,10 @@ import { site } from '@/config/site';
   @media (min-width: 900px) {
     .mediafeat__grid {
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the taller column. Flush-top, a 106px heading beside
+         a 306px body left a screen-deep void under the heading before the
+         section's own padding even began. */
+      align-items: center;
     }
 
     .mediafeat__headingwrap {
@@ -102,6 +105,6 @@ import { site } from '@/config/site';
     }
 
     .mediafeat__body :global(.prose) { color: var(--room-mute); }
-    .mediafeat__actions > :global(.btn) { flex: 0 0 auto; }
+    .mediafeat__actions > :global(.btn) { flex: 0 1 auto; }
   }
 </style>

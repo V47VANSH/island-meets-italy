@@ -115,17 +115,20 @@ const description =
     .contact__grid {
       /* Intro left of the meeting line, the form right of it. */
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the form. Flush-top, a 262px intro beside a 652px
+         form left ~390px of empty ink under the heading, which read as an
+         unfinished column rather than as space. */
+      align-items: center;
     }
 
     .contact__intro {
       grid-column: 1;
       justify-self: end;
-      text-align: right;
       padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
-      max-width: 26rem;
+      /* 26rem forced "Get in Touch" to break after "in" and set the standfirst
+         in a column narrower than its own measure. */
+      max-width: 32rem;
     }
-    .contact__intro :global(.prose) { margin-inline-start: auto; }
 
     .contact__formwrap {
       grid-column: 2;

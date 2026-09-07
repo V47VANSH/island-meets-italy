@@ -95,7 +95,11 @@
   /* ── Layout ───────────────────────────────────────────────────────────
      Mobile first; the min-width: 900px block below opens it up. */
   --gutter:    1.75rem;
-  --max-w:     1400px;
+  /* At 1400 a 1920 monitor gave 1194px of content and 350px of margin either
+     side — fine for a paragraph, starving for the photography. The measure is
+     still held by .prose's own 65ch cap, so widening this only affects the
+     things that wanted the room. */
+  --max-w:     1560px;
   --section-y: clamp(4.5rem, 11vh, 6.5rem);
   --header-h:  4.25rem;
 

@@ -144,7 +144,11 @@ const currentPath = Astro.url.pathname.replace(/(.)\/$/, '$1');
   /* :global — the class lands on the Wordmark component's own span, which
      carries that component's scope id, not this one's. */
   .header__brand :global(.wordmark) {
-    width: clamp(7.5rem, 16vw, 11rem);
+    /* 6rem floor, not 7.5rem: at 320px the 120px mark plus BUY THE BOOK —
+       whose label is fixed by the approved copy — plus the 44px trigger came
+       to more than the bar could hold, and the trigger was pushed off the
+       right edge. 16vw still governs everywhere above ~360px. */
+    width: clamp(6rem, 16vw, 11rem);
   }
 
   /* ── Links ──────────────────────────────────────────────────────────── */

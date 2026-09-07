@@ -186,11 +186,14 @@ const description =
       grid-column: 2;
       padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
     }
-    .mhero__actions > :global(.btn) { flex: 0 0 auto; }
+    .mhero__actions > :global(.btn) { flex: 0 1 auto; }
 
     .topics__grid {
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the taller column. Flush-top, a 106px heading beside
+         a 306px body left a screen-deep void under the heading before the
+         section's own padding even began. */
+      align-items: center;
     }
     .topics__headingwrap {
       grid-column: 1;

@@ -295,7 +295,10 @@ const description =
     .story__grid,
     .more__grid {
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      /* Centred against the taller column. Flush-top, a 106px heading beside
+         a 306px body left a screen-deep void under the heading before the
+         section's own padding even began. */
+      align-items: center;
     }
 
     .story__headingwrap {
@@ -307,24 +310,26 @@ const description =
     .story__body {
       grid-column: 2;
       padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
-      padding-block-start: clamp(0.5rem, 2vh, 1.5rem);
     }
 
-    /* Section 4 mirrors it: copy left, heading right. */
+    /* Heading left of the line, body right of it — the same way round as
+       every other room. Mirrored, the eye met four lines of copy before it
+       met the heading that framed them, and the copy had to be set flush
+       right to hold the axis, which leaves prose with a ragged left edge and
+       no reliable line start. The axis is still crossed; the reading order
+       is no longer inverted to do it. */
     .more__headingwrap {
-      grid-column: 2;
-      grid-row: 1;
-      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
-    }
-    .more__body {
       grid-column: 1;
       grid-row: 1;
       justify-self: end;
       text-align: right;
       padding-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
-    .more__body :global(.prose) { margin-inline-start: auto; }
-    .more__actions { display: flex; justify-content: flex-end; }
+    .more__body {
+      grid-column: 2;
+      grid-row: 1;
+      padding-inline-start: clamp(1.75rem, 4vw, 3.5rem);
+    }
 
     .accent__figure {
       /* Enters from the left, opposite to the section above it (§6.1). */
