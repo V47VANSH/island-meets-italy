@@ -2,17 +2,34 @@
 /**
  * Gallery (§7.4).
  *
- * Desktop is an asymmetric editorial grid, not four equal tiles: the branzino
- * is the signature dish and runs largest, the others step down and alternate
- * which side of the meeting line they sit on. Mobile is one dish per viewport,
- * full-bleed, name beneath — designed, not the desktop grid squeezed (§6.4).
+ * Two dishes to a room, not one to a page.
+ *
+ * One dish per full-width section could not work with these photographs. They
+ * are 3:4 portraits from 1080px-wide originals, so a frame that fits the
+ * viewport height is necessarily narrow — and a narrow object in a full-width
+ * section leaves half the screen empty. Sized to fill the width instead, each
+ * one ran half a screen taller than the viewport and could never be seen
+ * whole. The layout has to stop asking one portrait photograph to carry a
+ * widescreen row.
+ *
+ * Pairing solves it without breaking anything: the plate tones split exactly
+ * two and two, so grouping by tone puts two dishes in every room while every
+ * dish still lands on the ground §5.2 chose for it — white plates on cream,
+ * dark plates on ink. Each room is then an asymmetric pair (§7.4 asks for an
+ * editorial grid, explicitly not four equal tiles): a large squarer frame and
+ * a smaller portrait one dropped below it, and the two rooms mirror each
+ * other so the weight alternates down the page.
+ *
+ * Aspect ratios are chosen per role rather than left at the native 3:4. The
+ * large frame is square so that widening it does not also make it taller than
+ * the screen; the small one stays portrait, where its height costs nothing.
+ * Both are crops of the original, never upscales.
  *
  * Anchor ids come from the collection entry ids, which the homepage dish list
- * already links to: #branzino, #mango-caprese, #oxtail-arancini, #panna-cotta.
+ * links to: #branzino, #mango-caprese, #oxtail-arancini, #panna-cotta.
  *
- * Rooms follow `plateTone`: dark plates in ink, white plates in cream (§5.2).
- * Crops are the native 3:4 with nothing cut — every homepage crop is 4:5, so
- * no crop is ever reused.
+ * Mobile is one dish per viewport, full-bleed, name beneath — designed, not
+ * the desktop grid squeezed (§6.4).
  */
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
@@ -25,16 +42,22 @@ const dishes = (await getCollection('dishes')).sort(
 );
 
 /**
- * Editorial scale, deliberately uneven (§7.4). The signature dish is widest
- * and sits alone; the rest step down. Data drives the room, this drives the
- * composition — a fifth dish falls back to the medium treatment.
+ * Grouped by plate tone, so the room each dish lands in is still the one its
+ * photograph was shot for. Order within a group is the collection order, so
+ * the signature dish leads its room; a fifth dish joins whichever group its
+ * own plate tone puts it in and takes the smaller role.
  */
-const LAYOUT: Record<string, { scale: 'lead' | 'wide' | 'medium' | 'inset'; side: 'left' | 'right' }> = {
-  branzino: { scale: 'lead', side: 'left' },
-  'mango-caprese': { scale: 'medium', side: 'right' },
-  'oxtail-arancini': { scale: 'inset', side: 'left' },
-  'panna-cotta': { scale: 'wide', side: 'right' },
-};
+const rooms = (
+  [
+    { tone: 'cream' as const, plate: 'light' as const },
+    { tone: 'ink' as const, plate: 'dark' as const },
+  ]
+)
+  .map((room) => ({
+    ...room,
+    dishes: dishes.filter((d) => d.data.plateTone === room.plate),
+  }))
+  .filter((room) => room.dishes.length > 0);
 
 const title = 'Gallery — From the Island Meets Italy Kitchen';
 const description =
@@ -52,64 +75,57 @@ const description =
   </PageIntro>
 
   {
-    dishes.map((dish, i) => {
-      const layout = LAYOUT[dish.id] ?? { scale: 'medium', side: i % 2 ? 'right' : 'left' };
-      // No meeting line on a dish: the photograph is anchored to the page edge
-      // and never comes near the axis, so the rule would have the caption on
-      // one side and a very wide void on the other — it divides nothing. The
-      // caption's own hairline already marks the type, and the alternating
-      // sides are what carry the rhythm.
-      return (
-        <Section
-          tone={dish.data.plateTone === 'dark' ? 'ink' : 'cream'}
-          line={false}
-        >
-          <figure
-            class="dish"
-            id={dish.id}
-            data-scale={layout.scale}
-            data-side={layout.side}
-            data-reveal
-          >
-            <Image
-              src={dish.data.image}
-              alt={dish.data.alt}
-              widths={[480, 640, 800, 1080]}
-              sizes="(min-width: 900px) 60vw, 100vw"
-              loading={i === 0 ? 'eager' : 'lazy'}
-              class="dish__img"
-            />
-            <figcaption class="dish__caption">
-              <span class="dish__rule" aria-hidden="true" />
-              <span class="dish__name display">{dish.data.name}</span>
-            </figcaption>
-          </figure>
-        </Section>
-      );
-    })
+    rooms.map((room, roomIndex) => (
+      <Section tone={room.tone} line={false}>
+        <div class="plate" data-lead={roomIndex % 2 === 0 ? 'start' : 'end'}>
+          {room.dishes.map((dish, i) => {
+            const role = i === 0 ? 'lead' : 'counter';
+            return (
+              <figure class="dish" id={dish.id} data-role={role} data-reveal>
+                <Image
+                  src={dish.data.image}
+                  alt={dish.data.alt}
+                  widths={[420, 640, 860, 1080]}
+                  sizes={
+                    role === 'lead'
+                      ? '(min-width: 900px) 56vw, 100vw'
+                      : '(min-width: 900px) 31vw, 100vw'
+                  }
+                  loading={roomIndex === 0 && i === 0 ? 'eager' : 'lazy'}
+                  class="dish__img"
+                />
+                <figcaption class="dish__caption">
+                  <span class="dish__rule" aria-hidden="true" />
+                  <span class="dish__name display">{dish.data.name}</span>
+                </figcaption>
+              </figure>
+            );
+          })}
+        </div>
+      </Section>
+    ))
   }
 </Base>
 
 <style>
   /* ── Mobile: one dish per viewport, full-bleed ──────────────────────── */
 
+  .plate { display: grid; }
+
   .dish {
     margin: 0;
     /* Anchored from the homepage dish list — clear the fixed header. */
     scroll-margin-top: calc(var(--header-h) + 1rem);
   }
+  .dish + .dish { margin-block-start: clamp(3rem, 8vh, 4.5rem); }
 
   .dish__img {
-    /* global.css caps every image at max-width:100%, which is the container's
-       334px here — that silently clipped the bleed to the content width. The
-       hero escapes it because its negative margin is on the figure; this one
-       is on the image itself, so the cap has to be lifted explicitly. */
+    /* global.css caps every image at max-width:100%, which is the container
+       width here — that silently clipped the bleed. This one is on the image
+       itself, so the cap has to be lifted explicitly. Derived from the
+       padding it cancels rather than from 100vw, which on Windows is a
+       scrollbar wider than the page. */
     max-width: none;
-    /* Out to both edges: the Section's inner padding is cancelled here so a
-       dish fills the screen the way §7.4 asks, without the page scrolling
-       sideways (body has overflow-x: clip). Derived from the padding it is
-       cancelling rather than from 100vw, which on Windows is a scrollbar
-       wider than the page and bled 15px off the right of every dish. */
     width: calc(100% + var(--edge-x) * 2);
     margin-inline: calc(var(--edge-x) * -1);
     aspect-ratio: 3 / 4;
@@ -130,108 +146,52 @@ const description =
 
   .dish__name {
     display: block;
-    font-size: var(--step-2);
-    line-height: 1.15;
+    font-size: var(--step-1);
+    line-height: 1.2;
     letter-spacing: -0.01em;
     color: var(--room-text);
     text-wrap: balance;
   }
 
-  /* ── Desktop: asymmetric editorial grid ─────────────────────────────── */
+  /* ── Desktop: an asymmetric pair to a room ──────────────────────────── */
 
   @media (min-width: 900px) {
-    /* Every dish spans the full column and splits it: the photograph on its
-       own side, the name in the facing column sitting on the picture's bottom
-       edge. Previously only the lead did this and the rest were bare figures
-       floated left or right — an `inset` dish at 38% left a 60%-wide, 600px-
-       tall block of empty room beside it with nothing in it, which read as a
-       layout that had failed rather than as space. The asymmetry §7.4 asks
-       for now comes from how far the split moves, not from a void. */
-    /* A dish is bounded by HEIGHT, not driven by width. These are 3:4
-       portrait frames, so sizing them from the column made width and height
-       rise together: pushed to 62% of a 1920 screen the lead photograph came
-       out 1130x1507 — one and a half screens tall — and the page ran to seven
-       viewport-heights for four pictures. You could never see a dish whole.
-
-       A portrait photograph on a wide monitor cannot be both broad and wholly
-       visible, and §5.2 rules out cropping these frames wide. Being wholly
-       visible wins on the one page whose whole job is the food, so the margin
-       either side is the honest consequence — and it is put to work: the
-       photograph is anchored to the page edge and the name to the meeting
-       line, so both edges of the composition are disciplined and the slack
-       falls in the middle, between picture and caption, where a gap belongs.
-
-       The column boundary is the meeting line, as in every other room. */
-    .dish {
-      display: grid;
-      align-items: end;
-      column-gap: clamp(1.75rem, 4vw, 3.5rem);
-      width: 100%;
+    .plate {
+      grid-template-columns: 1.32fr 0.68fr;
+      column-gap: clamp(1.5rem, 3vw, 3rem);
+      align-items: start;
     }
 
-    /* The picture sits against its page edge and the name sits against the
-       picture, so each dish reads as one object and the space left over falls
-       on the far side — alternating down the page. Anchoring the name to the
-       axis instead left it stranded a third of the screen from its own
-       photograph, which only half worked while the meeting line was there to
-       justify it and stopped working at all once the line came out. */
-    /* The picture track is stated, not `auto`. An auto track sizes to its
-       item's max-content, and max-content for these is the 1080px source — so
-       the column came out far wider than the rendered picture and pushed the
-       name back into the middle of the page, which is exactly what moving it
-       off the axis was meant to stop. */
-    .dish { --dish-w: min(100%, calc(var(--dish-h) * 3 / 4)); }
-    .dish[data-side='left'] { grid-template-columns: var(--dish-w) minmax(0, 1fr); }
-    .dish[data-side='right'] { grid-template-columns: minmax(0, 1fr) var(--dish-w); }
+    /* The second room mirrors the first, so the weight alternates. */
+    .plate[data-lead='end'] { grid-template-columns: 0.68fr 1.32fr; }
+    .plate[data-lead='end'] .dish[data-role='lead'] { grid-column: 2; grid-row: 1; }
+    .plate[data-lead='end'] .dish[data-role='counter'] { grid-column: 1; grid-row: 1; }
+
+    .dish + .dish { margin-block-start: 0; }
 
     .dish__img {
-      /* Fills its track, which already carries the height cap. */
       width: 100%;
       max-width: 100%;
       margin-inline: 0;
     }
 
-    /* Deliberately uneven, and every one of them fits on the screen. */
-    .dish[data-scale='lead'] { --dish-h: min(86svh, 60rem); }
-    .dish[data-scale='wide'] { --dish-h: min(78svh, 54rem); }
-    .dish[data-scale='medium'] { --dish-h: min(72svh, 48rem); }
-    .dish[data-scale='inset'] { --dish-h: min(66svh, 44rem); }
+    /* Square, not the native 3:4: the large frame has to widen to fill its
+       column, and at 3:4 widening it also makes it taller than the viewport.
+       Square lets it take the width and still be seen whole. */
+    .dish[data-role='lead'] .dish__img { aspect-ratio: 1 / 1; }
 
-    .dish__caption {
-      align-self: end;
-      max-width: 26rem;
-    }
+    /* Dropped down the column, so the pair reads as a composition rather than
+       as two tiles flush to a line. Portrait costs nothing at this width.
 
-    /* Entering from the left: picture against the left page edge, name across
-       the line. Entering from the right, the mirror of it (§6.1). */
-    .dish[data-side='left'] .dish__img {
-      grid-column: 1;
-      grid-row: 1;
-      justify-self: start;
+       Qualified with .plate to outrank the `.dish + .dish` reset above it:
+       Astro scopes every compound, so that sibling selector carries two
+       class-plus-attribute compounds and wins a same-specificity tie the
+       source order would otherwise decide. */
+    .plate .dish[data-role='counter'] {
+      margin-block-start: clamp(3rem, 11vw, 8rem);
     }
-    .dish[data-side='left'] .dish__caption {
-      grid-column: 2;
-      grid-row: 1;
-      justify-self: start;
-    }
+    .dish[data-role='counter'] .dish__img { aspect-ratio: 4 / 5; }
 
-    .dish[data-side='right'] .dish__img {
-      grid-column: 2;
-      grid-row: 1;
-      justify-self: end;
-    }
-    .dish[data-side='right'] .dish__caption {
-      grid-column: 1;
-      grid-row: 1;
-      justify-self: end;
-      text-align: right;
-    }
-
-    .dish__rule { margin-block-start: 0; }
-    .dish__name { font-size: var(--step-2); }
-
-    /* The signature dish still reads differently: the largest frame and the
-       only name set at display scale. */
-    .dish[data-scale='lead'] .dish__name { font-size: var(--step-3); }
+    .dish[data-role='lead'] .dish__name { font-size: var(--step-2); }
   }
 </style>
