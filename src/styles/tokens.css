@@ -52,9 +52,13 @@
   --text-on-light:      #16150F;
   --text-on-light-mute: #5A5750;
 
-  /* ── Lines ────────────────────────────────────────────────────────────── */
+  /* ── Lines ────────────────────────────────────────────────────────────
+     Both are the brand gold, not neutral greys: --gold on ink, --gold-deep on
+     cream. Every hairline, table rule and field border in a light room is a
+     brand colour rather than a default border, which is most of what ties the
+     cream sections to the identity without adding anything to the page. */
   --rule-dark:  rgba(194, 155, 78, 0.30);
-  --rule-light: rgba(22, 21, 15, 0.14);
+  --rule-light: rgba(127, 97, 39, 0.28);
 
   /* ── Typography ───────────────────────────────────────────────────────
      Josefin Sans is the brand face and the only supplied font that may be

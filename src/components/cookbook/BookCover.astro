@@ -39,7 +39,7 @@ const cover = Object.values(coverModules)[0]?.default ?? null;
     cover ? (
       <Image
         src={cover}
-        alt={`${site.book.title} — ${site.book.volume}, front cover`}
+        alt={`${site.book.title} — ${site.book.volume}, ${site.book.format.toLowerCase()} front cover`}
         widths={[400, 700, 1000]}
         sizes="(min-width: 900px) 26rem, 68vw"
         loading="lazy"

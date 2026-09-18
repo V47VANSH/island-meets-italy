@@ -34,6 +34,17 @@ interface Props {
    */
   space?: 'default' | 'tight';
   lineCap?: 'none' | 'top' | 'bottom' | 'both';
+  /**
+   * Draw this section's segment of the meeting line. Default true.
+   *
+   * Set false where the section has no two-column relationship for the line to
+   * express — a single centred or offset block, or one full-width image. §6.1
+   * asks for a continuous rule, but a rule running the full height of a room
+   * that has nothing either side of it stops reading as "two things meeting"
+   * and starts reading as a stray border. Absent there, the line means more
+   * everywhere it does appear.
+   */
+  line?: boolean;
   class?: string;
   as?: 'section' | 'div' | 'footer';
 }
@@ -46,6 +57,7 @@ const {
   flush = 'none',
   space = 'default',
   lineCap = 'none',
+  line = true,
   class: className = '',
   as: Tag = 'section',
 } = Astro.props;
@@ -62,7 +74,7 @@ const {
     className,
   ]}
 >
-  <MeetingLine cap={lineCap} />
+  {line && <MeetingLine cap={lineCap} />}
   {
     bleed ? (
       <div class="section__bleed"><slot /></div>

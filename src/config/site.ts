@@ -29,15 +29,29 @@ export const site = {
   },
 
   book: {
+    /** Display title, as the cover lockup sets it. */
     title: 'Island Meets Italy',
     volume: 'Volume 1 — Foundations of Flavor',
+    /**
+     * The formal title, supplied by the client 18 Sep 2026. Used for the Title
+     * row of the book-information table and for JSON-LD `name` — anywhere the
+     * book is being *catalogued* rather than displayed. The hero lockup keeps
+     * `title` + `volume`, which is the designed treatment and the approved
+     * copy in build-context §7.3.
+     */
+    fullTitle:
+      'Island Meets Italy: Jamaican-Italian Fusion Recipes, Volume 1: Foundations of Flavor',
     author: 'Chef Kenton Lowrie',
-    publisher: 'Island Meets Italy Inc. Publishing',
-    format: 'Paperback',
-    pages: 87,
+    publisher: 'Island Meets Italy Inc.',
+    /** Hardcover, not paperback — the edition changed 18 Sep 2026. */
+    format: 'Hardcover',
+    distribution: 'KDP + IngramSpark',
+    /** PENDING — confirmed after the final hardcover layout. */
+    pages: null as number | null,
     language: 'English',
-    price: 'CAD $29.99',
-    priceValue: 29.99,
+    /** PENDING — retail price is set once the hardcover is costed. */
+    price: null as string | null,
+    priceValue: null as number | null,
     currency: 'CAD',
     /**
      * INTERIM. Extracted from page 2 of the Author & Book Media Kit PDF at the
@@ -46,22 +60,30 @@ export const site = {
      * should replace it before launch. Drop it at src/assets/book/cover.jpg.
      */
     coverImage: 'cover.jpg' as string | null,
-    isbn: null as string | null,              // PENDING
-    publicationDate: null as string | null,   // PENDING
+    isbn: '978-1-0680838-1-5' as string | null,
+    /** Display form. `publicationDateISO` is what JSON-LD gets. */
+    publicationDate: 'October 2026' as string | null,
+    /** ISO 8601 year-month — a valid schema.org Date. */
+    publicationDateISO: '2026-10' as string | null,
     purchaseUrl: null as string | null,       // PENDING — falls back to /cookbook
   },
 
   contact: {
-    email: null as string | null,             // PENDING
+    /**
+     * Supplied by the client 18 Sep 2026. This address renders publicly — in
+     * the footer, on the contact page and as the Media Inquiries destination —
+     * so it goes live the moment this is deployed.
+     */
+    email: 'info@islandmeetsitaly.com' as string | null,
     // phone: NEVER. Client prohibition.
 
     /**
-     * Where the contact form delivers. PENDING — the single value to change
-     * when the official address arrives. While it is null the endpoint accepts
-     * and logs the submission rather than sending, so the form is never broken
-     * and no address is ever hardcoded.
+     * Where the contact form delivers. Setting this is necessary but not
+     * sufficient: the endpoint still returns 503 in production until
+     * RESEND_API_KEY is in the deploy environment, because a "success" that
+     * sent nothing is worse than an honest failure (§17).
      */
-    formRecipient: null as string | null,
+    formRecipient: 'info@islandmeetsitaly.com' as string | null,
   },
 
   social: {

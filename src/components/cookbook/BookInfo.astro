@@ -11,29 +11,37 @@ import Section from '@/components/layout/Section.astro';
 import Eyebrow from '@/components/ui/Eyebrow.astro';
 import { site, PENDING_LABEL } from '@/config/site';
 
-const rows: { label: string; value: string; pending?: boolean }[] = [
-  { label: 'Title', value: site.book.title },
-  { label: 'Volume', value: site.book.volume },
-  { label: 'Author', value: site.book.author },
-  { label: 'Publisher', value: site.book.publisher },
-  { label: 'Format', value: site.book.format },
-  { label: 'Pages', value: String(site.book.pages) },
-  { label: 'Language', value: site.book.language },
-  { label: 'Price', value: site.book.price },
-  {
-    label: 'ISBN',
-    value: site.book.isbn ?? PENDING_LABEL,
-    pending: site.book.isbn === null,
-  },
-  {
-    label: 'Publication Date',
-    value: site.book.publicationDate ?? PENDING_LABEL,
-    pending: site.book.publicationDate === null,
-  },
+/**
+ * A row whose value may not have arrived yet. Pending values render the word
+ * `Pending` in the same row at the same size, so the real value lands with no
+ * layout shift (§10).
+ */
+const row = (label: string, value: string | number | null) => ({
+  label,
+  value: value === null ? PENDING_LABEL : String(value),
+  pending: value === null,
+});
+
+/**
+ * This is the book being catalogued rather than displayed, so the Title row
+ * carries the formal title. The hero lockup above keeps the cover treatment.
+ */
+const rows = [
+  row('Title', site.book.fullTitle),
+  row('Volume', site.book.volume),
+  row('Author', site.book.author),
+  row('Publisher', site.book.publisher),
+  row('Format', site.book.format),
+  row('Distribution', site.book.distribution),
+  row('Pages', site.book.pages),
+  row('Language', site.book.language),
+  row('Price', site.book.price),
+  row('ISBN', site.book.isbn),
+  row('Publication Date', site.book.publicationDate),
 ];
 ---
 
-<Section tone="cream" labelledby="book-info-title" class="bookinfo">
+<Section tone="cream" labelledby="book-info-title" class="bookinfo" line={false}>
   <div class="bookinfo__wrap" data-reveal>
     <Eyebrow as="div"><h2 id="book-info-title" class="bookinfo__title">Book Information</h2></Eyebrow>
 

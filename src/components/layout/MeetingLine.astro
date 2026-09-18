@@ -62,13 +62,41 @@ const { cap = 'none' } = Astro.props;
     }
   }
 
+  /* Every segment breathes at its ends. A section pays --section-y of vertical
+     rhythm top and bottom, and at full strength the rule ran through both
+     bands as insistently as it runs past the content — which is what made it
+     read as running unnecessarily through large empty areas. Fading to a
+     fifth through the joins keeps the spine continuous (§6.1) while letting it
+     recede where there is nothing either side of it. Caps override this: the
+     first and last segments on a page fade out completely instead. */
+  .meeting-line--cap-none {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.2),
+      #000 16%,
+      #000 84%,
+      rgba(0, 0, 0, 0.2)
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.2),
+      #000 16%,
+      #000 84%,
+      rgba(0, 0, 0, 0.2)
+    );
+  }
+
   .meeting-line--cap-top {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%);
-    mask-image: linear-gradient(to bottom, transparent, #000 7%);
+    -webkit-mask-image: linear-gradient(
+      to bottom, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
+    mask-image: linear-gradient(
+      to bottom, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
   }
   .meeting-line--cap-bottom {
-    -webkit-mask-image: linear-gradient(to top, transparent, #000 7%);
-    mask-image: linear-gradient(to top, transparent, #000 7%);
+    -webkit-mask-image: linear-gradient(
+      to top, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
+    mask-image: linear-gradient(
+      to top, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
   }
   .meeting-line--cap-both {
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);

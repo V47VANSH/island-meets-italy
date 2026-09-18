@@ -121,13 +121,26 @@ const fieldIds = {
     </button>
   </form>
 
-  {/* Replaces the form in place on success — no navigation (§7.6). */}
-  <div class="form__done" data-form-success role="status" hidden>
+  {/*
+    Replaces the form in place on success — no navigation (§7.6).
+
+    tabindex="-1" is load-bearing: the script calls .focus() here, and on a
+    plain <div> that is a no-op, so focus was left on the submit button as it
+    was hidden and fell back to <body>. A keyboard or screen-reader user was
+    dropped at the top of the document with no idea the message had sent.
+  */}
+  <div class="form__done" data-form-success role="status" tabindex="-1" hidden>
+    <span class="form__donerule rule-double" aria-hidden="true"></span>
     <p class="form__donetitle display">Thank you — your message is on its way.</p>
     <p class="form__donebody prose">
       Kenton reads every inquiry personally and will reply to the address you
       gave as soon as he can.
     </p>
+    {site.contact.email && (
+      <p class="form__donemeta utility">
+        Sent to {site.contact.email}
+      </p>
+    )}
   </div>
 </div>
 
@@ -262,17 +275,35 @@ const fieldIds = {
 
   .form__done[hidden] { display: none; }
 
+  /* The cover's double hairline, so the confirmation reads as part of the
+     brand rather than as a generic success message. */
+  .form__donerule { margin-block-end: clamp(1.5rem, 4vh, 2rem); }
+
   .form__donetitle {
-    font-size: var(--step-2);
-    line-height: 1.2;
+    font-size: var(--step-3);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
     color: var(--room-accent);
     text-wrap: balance;
   }
 
   .form__donebody {
-    margin-block-start: 1rem;
+    margin-block-start: 1.1rem;
     color: var(--room-mute);
   }
+
+  .form__donemeta {
+    margin-block-start: clamp(1.5rem, 4vh, 2rem);
+    padding-block-start: 1.1rem;
+    border-block-start: 1px solid var(--room-rule);
+    color: var(--room-mute);
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  /* The panel is focused programmatically, never by tabbing to it. */
+  .form__done:focus { outline: none; }
+  .form__done:focus-visible { outline: none; }
 
   @media (min-width: 700px) {
     .form__submit { width: auto; min-width: 14rem; }

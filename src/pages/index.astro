@@ -23,20 +23,31 @@ const description =
  *  emitted as empty strings — invalid structured data is worse than none. */
 const bookSchema = {
   '@type': 'Book',
-  name: `${site.book.title} — ${site.book.volume}`,
+  name: site.book.fullTitle,
   author: { '@id': `${site.url}/#kenton` },
   publisher: site.book.publisher,
-  numberOfPages: site.book.pages,
-  bookFormat: 'https://schema.org/Paperback',
+  bookFormat: 'https://schema.org/Hardcover',
   inLanguage: 'en',
+  ...(site.book.pages ? { numberOfPages: site.book.pages } : {}),
   ...(site.book.isbn ? { isbn: site.book.isbn } : {}),
-  ...(site.book.publicationDate ? { datePublished: site.book.publicationDate } : {}),
-  offers: {
-    '@type': 'Offer',
-    price: site.book.priceValue,
-    priceCurrency: site.book.currency,
-    ...(site.book.purchaseUrl ? { url: site.book.purchaseUrl } : {}),
-  },
+  ...(site.book.publicationDateISO
+    ? { datePublished: site.book.publicationDateISO }
+    : {}),
+  /**
+   * An Offer without a price is invalid, and invalid structured data is worse
+   * than none (§12) — so the whole node is omitted until the hardcover is
+   * costed, rather than emitting `price: null`.
+   */
+  ...(site.book.priceValue !== null
+    ? {
+        offers: {
+          '@type': 'Offer',
+          price: site.book.priceValue,
+          priceCurrency: site.book.currency,
+          ...(site.book.purchaseUrl ? { url: site.book.purchaseUrl } : {}),
+        },
+      }
+    : {}),
 };
 ---
 

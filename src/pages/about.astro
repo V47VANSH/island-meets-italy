@@ -96,7 +96,8 @@ const description =
   </Section>
 
   {/* The one light-room accent, between sections 2 and 3 (§7.2) */}
-  <Section tone="cream" class="accent">
+  {/* One full-width image — nothing meets across the axis here. */}
+  <Section tone="cream" class="accent" line={false}>
     <figure class="accent__figure" data-reveal>
       <Image
         src={caprese.data.image}
@@ -110,7 +111,8 @@ const description =
   </Section>
 
   {/* 3 — The Philosophy: the emotional centre, given the most room */}
-  <Section tone="cream" labelledby="philosophy-title" class="philosophy">
+  {/* A single block offset right of the axis; the offset is the gesture. */}
+  <Section tone="cream" labelledby="philosophy-title" class="philosophy" line={false}>
     <div class="philosophy__wrap">
       <h2 class="philosophy__title display" id="philosophy-title" data-reveal>
         The Philosophy
