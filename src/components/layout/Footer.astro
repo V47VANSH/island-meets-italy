@@ -20,7 +20,12 @@ const footerLinks = [
 ];
 ---
 
-<Section as="footer" tone="ink" space="tight" lineCap="bottom" class="footer">
+{/* No line: the footer already partitions with a horizontal rule above the
+    legal line, and the vertical one crossed it to make a stray intersection
+    before running on to the bottom of the page past all content. A closing
+    block wants a horizontal rule, not a vertical one. The page's spine now
+    ends by fading through the last content section's own padding. */}
+<Section as="footer" tone="ink" space="tight" line={false} class="footer">
   <div class="footer__grid">
     <div class="footer__identity">
       <div class="footer__wordmark">
@@ -74,8 +79,11 @@ const footerLinks = [
     </div>
   </div>
 
+  {/* One expression, not three: Astro drops the literal whitespace between
+      two adjacent {} expressions, which was rendering "© 2026Island Meets
+      Italy Inc." with no space after the year. */}
   <p class="footer__legal">
-    © {year} {site.legalName} All Rights Reserved.
+    {`© ${year} ${site.legalName} All Rights Reserved.`}
   </p>
 </Section>
 

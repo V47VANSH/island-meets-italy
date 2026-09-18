@@ -32,7 +32,11 @@ const lead =
   dishes[0];
 ---
 
-<Section tone="cream" labelledby="food-title" bleed class="food">
+{/* No line: the branzino runs from the left edge across the axis, so the
+    rule is behind the photograph for most of its height and, below it, a
+    gold-deep hairline on cream too faint to read. The picture crossing the
+    axis is the gesture (§6.1); the rule adds nothing to it. */}
+<Section tone="cream" labelledby="food-title" bleed line={false} class="food">
   <div class="food__grid">
     <figure class="food__figure" data-reveal>
       <Image

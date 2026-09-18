@@ -41,7 +41,10 @@ const rows = [
 ];
 ---
 
-<Section tone="cream" labelledby="book-info-title" class="bookinfo" line={false}>
+{/* The line stays here after all: the table ends exactly on the axis, so the
+    rule draws its right edge and closes the grid the row hairlines start.
+    With the fade bound to the section's rhythm it spans the table and stops. */}
+<Section tone="cream" labelledby="book-info-title" class="bookinfo">
   <div class="bookinfo__wrap" data-reveal>
     <Eyebrow as="div"><h2 id="book-info-title" class="bookinfo__title">Book Information</h2></Eyebrow>
 

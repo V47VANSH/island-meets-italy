@@ -103,10 +103,14 @@ const description =
         src={caprese.data.image}
         alt={caprese.data.alt}
         widths={[600, 900, 1080]}
-        sizes="(min-width: 900px) 78vw, 100vw"
+        sizes="(min-width: 900px) 62vw, 100vw"
         loading="lazy"
         class="accent__img"
       />
+      <figcaption class="accent__caption">
+        <span class="rule-double accent__rule" aria-hidden="true"></span>
+        <span class="accent__name display">{caprese.data.name}</span>
+      </figcaption>
     </figure>
   </Section>
 
@@ -233,13 +237,28 @@ const description =
 
   .accent__img {
     width: 100%;
-    /* A deliberate detail band rather than a record of the whole plate — the
-       gallery shows that. §5.2 warns these portrait frames crop badly wide,
-       and it is right for the hero; here the diagonal arrangement of mango,
-       mozzarella and pea shoots survives a tight horizontal band intact. */
+    /* A detail band rather than a record of the whole plate — the gallery
+       shows that. §5.2 warns these portrait frames crop badly wide, so the
+       band stays shallow enough to read as a crop and deep enough to keep the
+       diagonal of mango, mozzarella and pea shoots intact. */
     aspect-ratio: 16 / 9;
     object-fit: cover;
     object-position: center 55%;
+  }
+
+  /* The name, so the cream room holds a piece of type rather than a bare
+     rectangle, and the cover's double rule to tie it to the brand. */
+  .accent__caption {
+    display: block;
+    margin-block-start: clamp(1.25rem, 3vh, 1.75rem);
+  }
+  .accent__name {
+    display: block;
+    margin-block-start: clamp(0.9rem, 2vh, 1.25rem);
+    font-size: var(--step-2);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--room-text);
   }
 
   /* ── 3. Philosophy ──────────────────────────────────────────────────── */
@@ -335,9 +354,12 @@ const description =
 
     .accent__figure {
       /* Enters from the left, opposite to the section above it (§6.1). */
-      width: 78%;
+      width: 62%;
     }
-    .accent__img { aspect-ratio: 21 / 9; }
+    /* 21:9 magnified a portrait source until the dish was unreadable — an
+       abstract yellow field with the mozzarella and shoots cropped away. 3:2
+       shows the plate and asks less of a 1080px-wide original. */
+    .accent__img { aspect-ratio: 3 / 2; }
 
     .philosophy__wrap {
       /* Offset right of the rule, so the page's quietest moment still sits

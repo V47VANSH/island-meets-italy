@@ -54,8 +54,16 @@ const description =
   {
     dishes.map((dish, i) => {
       const layout = LAYOUT[dish.id] ?? { scale: 'medium', side: i % 2 ? 'right' : 'left' };
+      // No meeting line on a dish: the photograph is anchored to the page edge
+      // and never comes near the axis, so the rule would have the caption on
+      // one side and a very wide void on the other — it divides nothing. The
+      // caption's own hairline already marks the type, and the alternating
+      // sides are what carry the rhythm.
       return (
-        <Section tone={dish.data.plateTone === 'dark' ? 'ink' : 'cream'}>
+        <Section
+          tone={dish.data.plateTone === 'dark' ? 'ink' : 'cream'}
+          line={false}
+        >
           <figure
             class="dish"
             id={dish.id}
@@ -156,14 +164,29 @@ const description =
        The column boundary is the meeting line, as in every other room. */
     .dish {
       display: grid;
-      grid-template-columns: 1fr 1fr;
       align-items: end;
+      column-gap: clamp(1.75rem, 4vw, 3.5rem);
       width: 100%;
     }
 
+    /* The picture sits against its page edge and the name sits against the
+       picture, so each dish reads as one object and the space left over falls
+       on the far side — alternating down the page. Anchoring the name to the
+       axis instead left it stranded a third of the screen from its own
+       photograph, which only half worked while the meeting line was there to
+       justify it and stopped working at all once the line came out. */
+    /* The picture track is stated, not `auto`. An auto track sizes to its
+       item's max-content, and max-content for these is the 1080px source — so
+       the column came out far wider than the rendered picture and pushed the
+       name back into the middle of the page, which is exactly what moving it
+       off the axis was meant to stop. */
+    .dish { --dish-w: min(100%, calc(var(--dish-h) * 3 / 4)); }
+    .dish[data-side='left'] { grid-template-columns: var(--dish-w) minmax(0, 1fr); }
+    .dish[data-side='right'] { grid-template-columns: minmax(0, 1fr) var(--dish-w); }
+
     .dish__img {
-      /* Fills its half of the page until the height cap bites, then holds. */
-      width: min(100%, calc(var(--dish-h) * 3 / 4));
+      /* Fills its track, which already carries the height cap. */
+      width: 100%;
       max-width: 100%;
       margin-inline: 0;
     }
@@ -190,7 +213,6 @@ const description =
       grid-column: 2;
       grid-row: 1;
       justify-self: start;
-      margin-inline-start: clamp(1.75rem, 4vw, 3.5rem);
     }
 
     .dish[data-side='right'] .dish__img {
@@ -203,7 +225,6 @@ const description =
       grid-row: 1;
       justify-self: end;
       text-align: right;
-      margin-inline-end: clamp(1.75rem, 4vw, 3.5rem);
     }
 
     .dish__rule { margin-block-start: 0; }

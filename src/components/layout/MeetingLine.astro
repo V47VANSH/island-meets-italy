@@ -41,6 +41,41 @@ const { cap = 'none' } = Astro.props;
     background: var(--room-line);
     pointer-events: none;
     z-index: 1;
+
+    /* Fade across exactly the section's vertical rhythm, so the rule marks the
+       band where the two columns actually face each other and is gone through
+       the padding above and below them. Section publishes these; its flush
+       modifiers zero them, so a hero that pays no padding keeps a solid line.
+
+       Percentages could not do this: on a 348px section with 129px of padding
+       each end, the content band is only the middle quarter, and a percentage
+       fade left the rule running at full strength through both bands. */
+    --fade-top: var(--line-fade-start, 0px);
+    --fade-bottom: var(--line-fade-end, 0px);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--fade-top),
+      #000 calc(100% - var(--fade-bottom)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--fade-top),
+      #000 calc(100% - var(--fade-bottom)),
+      transparent 100%
+    );
+  }
+
+  /* Below the desktop breakpoint every section stacks to one column, so there
+     is nothing for the rule to divide: --axis-x moves to the left gutter and
+     it becomes a hairline 14px from the screen edge, which reads as a stray
+     border on the section rather than as the brand's spine — most obviously
+     on the cream rooms, where a warm line sits against a light ground. The
+     alternating ink and cream rooms already partition the page there. */
+  @media (max-width: 899px) {
+    .meeting-line { display: none; }
   }
 
   /* Step 1 of the hero sequence: the rule draws downward (§6.6). Only the
@@ -62,44 +97,12 @@ const { cap = 'none' } = Astro.props;
     }
   }
 
-  /* Every segment breathes at its ends. A section pays --section-y of vertical
-     rhythm top and bottom, and at full strength the rule ran through both
-     bands as insistently as it runs past the content — which is what made it
-     read as running unnecessarily through large empty areas. Fading to a
-     fifth through the joins keeps the spine continuous (§6.1) while letting it
-     recede where there is nothing either side of it. Caps override this: the
-     first and last segments on a page fade out completely instead. */
-  .meeting-line--cap-none {
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.2),
-      #000 16%,
-      #000 84%,
-      rgba(0, 0, 0, 0.2)
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.2),
-      #000 16%,
-      #000 84%,
-      rgba(0, 0, 0, 0.2)
-    );
-  }
-
-  .meeting-line--cap-top {
-    -webkit-mask-image: linear-gradient(
-      to bottom, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
-    mask-image: linear-gradient(
-      to bottom, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
-  }
-  .meeting-line--cap-bottom {
-    -webkit-mask-image: linear-gradient(
-      to top, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
-    mask-image: linear-gradient(
-      to top, transparent, #000 7%, #000 84%, rgba(0, 0, 0, 0.2));
-  }
+  /* Caps fade the first and last segment on a page, on top of whatever the
+     section's own rhythm already contributes. */
+  .meeting-line--cap-top { --fade-top: max(var(--line-fade-start, 0px), 5rem); }
+  .meeting-line--cap-bottom { --fade-bottom: max(var(--line-fade-end, 0px), 5rem); }
   .meeting-line--cap-both {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
-    mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    --fade-top: max(var(--line-fade-start, 0px), 5rem);
+    --fade-bottom: max(var(--line-fade-end, 0px), 5rem);
   }
 </style>

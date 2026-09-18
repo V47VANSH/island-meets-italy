@@ -15,7 +15,11 @@ import Ornament from '@/components/brand/Ornament.astro';
 import { site } from '@/config/site';
 ---
 
-<Section tone="ink" labelledby="media-feature-title" class="mediafeat">
+{/* No line: the page-foot ornament is centred, so it sits ON the axis and
+    the rule bisects the mark — the collision left open in SESSION-CONTEXT §12.
+    Below the buttons the rule also runs a couple of hundred pixels through
+    nothing. The ornament is this section's closing device and wins. */}
+<Section tone="ink" labelledby="media-feature-title" line={false} class="mediafeat">
   <div class="mediafeat__grid">
     <div class="mediafeat__headingwrap" data-reveal>
       <Eyebrow class="mediafeat__eyebrow">Media &amp; Press</Eyebrow>

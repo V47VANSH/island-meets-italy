@@ -96,9 +96,21 @@ const {
 
   .section--space-tight { --section-y: clamp(4.5rem, 9vh, 7rem); }
 
-  .section--flush-top { padding-block-start: 0; }
-  .section--flush-bottom { padding-block-end: 0; }
-  .section--flush-both { padding-block: 0; }
+  /* How far the meeting line fades at each end: the padding it would
+     otherwise run through. --section-y is already re-declared by
+     --space-tight above, so the tight rhythm is picked up automatically. */
+  .section {
+    --line-fade-start: var(--section-y);
+    --line-fade-end: var(--section-y);
+  }
+
+  .section--flush-top { padding-block-start: 0; --line-fade-start: 0px; }
+  .section--flush-bottom { padding-block-end: 0; --line-fade-end: 0px; }
+  .section--flush-both {
+    padding-block: 0;
+    --line-fade-start: 0px;
+    --line-fade-end: 0px;
+  }
 
   .section__inner {
     position: relative;

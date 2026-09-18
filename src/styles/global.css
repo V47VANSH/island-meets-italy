@@ -177,6 +177,25 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   padding-block-start: 0;
 }
 
+/* The footer is always ink. Where the last room on a page is ink too, the two
+   meet with no change of ground to mark the join and the page just runs on. A
+   gold hairline draws it. Where the last room is cream the colour change is
+   the division and no rule is wanted, which is what the .room-ink qualifier
+   buys. :last-of-type, not :last-child — the cookbook's sticky buy bar is the
+   actual last child of <main>. */
+main > section.section.room-ink:last-of-type::after {
+  content: '';
+  position: absolute;
+  /* Inset to the content edge, not full-bleed: the footer's own rule above the
+     legal line sits at --edge-x, and two rules a few pixels apart in the same
+     corner of the page have to agree or they read as a mistake. */
+  inset-inline: var(--edge-x);
+  inset-block-end: 0;
+  height: 1px;
+  background: var(--rule-dark);
+  pointer-events: none;
+}
+
 /* ── Brand devices ──────────────────────────────────────────────────────
    Lifted from the cookbook cover and the media kit, not invented. */
 
