@@ -118,18 +118,39 @@ const alt = `${site.chef.name}, photographed straight on against a soft cream cu
        meeting line (§6.7). Fading each edge instead keeps it a photograph
        whose edges melt, with the heaviest fade at the bottom so the coat and
        shoulders go and the face and chain stay. */
+    /* Four edge fades plus a soft centre falloff.
+       The edges alone were not enough here. The curtain is far brighter than
+       --ink, so fading only the outermost 16% left everything between roughly
+       20% and 80% at full strength — a bright rectangle with soft corners
+       sitting on the black, which read as a visible border. The radial layer
+       carries the periphery down to near-nothing while holding the face and
+       the gold chain at full opacity, and because it never reaches zero it is
+       the linear edges that still do the actual edge work: the frame
+       dissolves without the picture becoming an oval medallion (§6.7). */
     -webkit-mask-image:
-      linear-gradient(to bottom, transparent 0%, #000 14%),
-      linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.25) 18%, #000 46%),
-      linear-gradient(to right, transparent 0%, #000 16%),
-      linear-gradient(to left, transparent 0%, #000 16%);
+      linear-gradient(to bottom, transparent 0%, #000 16%),
+      linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.2) 16%, #000 44%),
+      linear-gradient(to right, transparent 0%, #000 20%),
+      linear-gradient(to left, transparent 0%, #000 20%),
+      radial-gradient(
+        ellipse 64% 68% at 50% 42%,
+        #000 44%,
+        rgba(0, 0, 0, 0.5) 74%,
+        rgba(0, 0, 0, 0.08) 100%
+      );
     mask-image:
-      linear-gradient(to bottom, transparent 0%, #000 14%),
-      linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.25) 18%, #000 46%),
-      linear-gradient(to right, transparent 0%, #000 16%),
-      linear-gradient(to left, transparent 0%, #000 16%);
-    -webkit-mask-composite: source-in, source-in, source-in;
-    mask-composite: intersect, intersect, intersect;
+      linear-gradient(to bottom, transparent 0%, #000 16%),
+      linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.2) 16%, #000 44%),
+      linear-gradient(to right, transparent 0%, #000 20%),
+      linear-gradient(to left, transparent 0%, #000 20%),
+      radial-gradient(
+        ellipse 64% 68% at 50% 42%,
+        #000 44%,
+        rgba(0, 0, 0, 0.5) 74%,
+        rgba(0, 0, 0, 0.08) 100%
+      );
+    -webkit-mask-composite: source-in, source-in, source-in, source-in;
+    mask-composite: intersect, intersect, intersect, intersect;
   }
 
   @media (prefers-contrast: more) {

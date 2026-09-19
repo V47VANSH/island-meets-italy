@@ -142,6 +142,9 @@ const arancini =
   .cookbook__coverimg {
     width: min(100%, 20rem);
     height: auto;
+    /* Centred in the stack. Desktop resets this — there the cover is
+       deliberately anchored left so the dish overlaps its lower-right. */
+    margin-inline: auto;
   }
 
   .cookbook__dishimg {
@@ -207,6 +210,7 @@ const arancini =
     }
     [data-has-cover] .cookbook__coverimg {
       width: min(100%, 28rem);
+      margin-inline: 0;
     }
     /* The secondary photograph, offset and overlapping (§7.1). At 58% it was
        wider than the gap between the cover's right edge and the page edge, so

@@ -174,7 +174,17 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    stylesheet a given page happened to order first. */
 .section.room-ink:not(.section--flush-bottom):not(.section--flush-both) + .section.room-ink,
 .section.room-cream:not(.section--flush-bottom):not(.section--flush-both) + .section.room-cream {
-  padding-block-start: 0;
+  padding-block-start: calc(var(--section-y) * 0.5);
+}
+
+/* ...and the room above it gives up the other half, so the pair still pays a
+   single measure between them — but split across the join instead of banked
+   entirely above it. At a flat 0 the whole measure sat above the boundary and
+   the next room's heading started hard against its own top edge, with the
+   ascenders of "The Philosophy" touching the section above. */
+.section.room-ink:not(.section--flush-bottom):not(.section--flush-both):has(+ .section.room-ink),
+.section.room-cream:not(.section--flush-bottom):not(.section--flush-both):has(+ .section.room-cream) {
+  padding-block-end: calc(var(--section-y) * 0.5);
 }
 
 /* The footer is always ink. Where the last room on a page is ink too, the two
